@@ -1,11 +1,29 @@
 import DatePicker from './DatePicker'
 import TimePicker from './TimePicker'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import "../styles/SchedulePicker.css";
+
+const Selection = (props) => {
+    return (
+        <div className='selection'>
+            {props.selection[0].toLocaleDateString("en-US")} - {props.selection[1] === null ? '' : props.selection[1].toLocaleDateString("en-US")}
+        </div>)
+
+}
+
+const SelectedDates = (props) => {
+    return (
+        <div className='active-selections'>
+            {props.selection.map(selection => (
+                <Selection selection={selection} />
+            ))}
+        </div>
+        );
+}
 
 const SchedulePicker = (props) => {
 
-    const [selection, setSelection] = useState([null, null])
+    const [selection, setSelection] = useState([])
     
     const generateDatePickers = (initDate, finalDate) => {
         let datePickers = []        
@@ -40,7 +58,9 @@ const SchedulePicker = (props) => {
     }
 
     const datePickers = generateDatePickers(props.initDate, props.finalDate)   
-    console.log('sched-pick: init Date: ', props.initDate);
+    useEffect(() => {
+    console.log('selections changed:', selection)
+    }, [selection])
 
     return (
         <div className='schedule-picker'>
@@ -49,11 +69,7 @@ const SchedulePicker = (props) => {
                 {datePickers}
             </div>
 
-            <div className='schedule-log'>
-                <p>current selection: {selection.toString()}</p>
-                {/* <p>start: {selection[0]}</p>
-                <p>end: {selection[1]}</p> */}
-            </div>
+            <SelectedDates selection={selection}/>
                 
             {selection[0] !== null &&
                 <TimePicker 
