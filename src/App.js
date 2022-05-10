@@ -1,23 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import "./styles/index.css";
+import "./styles/App.css";
+import SchedulePicker from './components/SchedulePicker';
 
 function App() {
+
+  // months starting with 0
+  let initDate = new Date(2022, 0, 15) //current
+  let finalDate = new Date(2022, 2, 15)
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <header>
+        <p>Starting date: {initDate.getDate()}.{initDate.getMonth()}.{initDate.getYear()}</p>
+        <p>Final date: {finalDate.getDate()}.{finalDate.getMonth()}.{finalDate.getYear()}</p>
       </header>
+      <SchedulePicker initDate={initDate} finalDate={finalDate} />
     </div>
   );
 }

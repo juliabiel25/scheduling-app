@@ -1,0 +1,35 @@
+.day-tiles {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+  
+.day-tile {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin: 3px;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.weekday-label {
+    color: rgb(191, 191, 191);
+}
+
+.tile-enabled:hover {
+    background-color: rgb(250, 210, 49);
+}
+
+.tile-enabled {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(207, 207, 207);
+}
+
+.tile-disabled {
+    background-color: rgb(243, 242, 242);
+    color:rgb(163, 163, 163);
+}
+  
+  
