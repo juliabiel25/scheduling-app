@@ -29,8 +29,8 @@ const DayTiles = (props) => {
     }
 
     return(
-        props.cal.days.map(
-            day => {
+        props.cal.days.map(           
+            day => (
                 <div  
                     key={ `${day.date.toString()}` }
                     className={
@@ -39,10 +39,10 @@ const DayTiles = (props) => {
                         ${day.isCurrentMonth ? 'current-month-tile' : 'previousMonthTile'}`
                     }
                     onClick={ day.isEnabled ? dayTileClicked : undefined }
-                    >
+                >
                         { day.date.getDate() }
                 </div>
-            }
+            )
         )
     )
         
