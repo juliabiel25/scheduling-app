@@ -14,8 +14,8 @@ const Selection = (props) => {
 const SelectedDates = (props) => {
     return (
         <div className='active-selections'>
-            {props.selection.map(selection => (
-                <Selection selection={selection} />
+            {props.selection.map((selection, index) => (
+                <Selection selection={selection} key={index} />
             ))}
         </div>
         );

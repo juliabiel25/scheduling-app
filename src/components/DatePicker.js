@@ -1,4 +1,3 @@
-import { range } from '../utils/functions';
 import { useState } from 'react'
 import Calendar from '../utils/Calendar';
 import "../styles/DatePicker.css";
@@ -32,7 +31,7 @@ const DayTiles = (props) => {
         props.cal.days.map(           
             day => (
                 <div  
-                    key={ `${day.date.toString()}` }
+                    key={ `${day.isCurrentMonth.toString()}-${day.date.toString()}` }
                     className={
                         `day-tile 
                         ${day.isEnabled ? 'tile-enabled' : 'tile-disabled'} 
@@ -45,50 +44,6 @@ const DayTiles = (props) => {
             )
         )
     )
-        
-    // const previousMonthTiles = props.cal.previousMonthDays.map(day => (
-    //     <div 
-    //         key={`${props.cal.month - 1}-${day}`} 
-    //         className="day-tile tile-disabled">
-    //             {day}
-    //     </div>
-    // ))
-
-    // const currentMonthTiles = props.cal.days.map(day => {
-    //     // if the tile is < initDate
-    //     if (day.date.getMonth() === props.initDate.getMonth() && day.date.getDate() < props.initDate.getDate()) {
-    //         return (
-    //             <div  
-    //                 key={`${day.date.toString()}`}
-    //                 className="day-tile tile-curr-month tile-disabled">
-    //                     {day.date.getDate()}
-    //             </div>
-    //         )
-    //     }
-
-    //     // if the tile is < initDate
-    //     if (day.date.getMonth() === props.finalDate.getMonth() && day.date.getDate() > props.finalDate.getDate()) {
-    //         return (
-    //             <div  
-    //                 key={`${day.date.toString()}`}
-    //                 className="day-tile tile-curr-month tile-disabled">
-    //                     {day.date.getDate()}
-    //             </div>
-    //         )
-    //     }
-
-    //     //regular tile
-    //     return (
-    //         <div  
-    //             key={`${day.date.toString()}`}
-    //             className="day-tile tile-curr-month tile-enabled" 
-    //             onClick={(e)=>(dayTileClicked(e))}>
-    //                 {day.date.getDate()}
-    //         </div>
-    //     )
-    // });
-
-    // return [...previousMonthTiles, ...currentMonthTiles];
 };
     
 const WeekdayLabels = (props) => {
