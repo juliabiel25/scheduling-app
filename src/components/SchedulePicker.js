@@ -2,28 +2,31 @@ import DatePicker from './DatePicker'
 import TimePicker from './TimePicker'
 import React, { useState, useEffect } from 'react'
 import "../styles/SchedulePicker.css";
+import DateSelection from '../utils/DateSelection';
 
-const Selection = (props) => {
+const Selection = ({selection}) => {
     return (
         <div className='selection'>
-            {props.selection.toString()}
+            {selection.toString()}
         </div>)
 
 }
 
-const SelectedDates = (props) => {
+const SelectedDates = ({selectionSet}) => {
     return (
         <div className='active-selections'>
-            {props.selection.map((selection, index) => (
+            {selectionSet.map((selection, index) => (
                 <Selection selection={selection} key={index} />
             ))}
         </div>
         );
 }
 
-const SchedulePicker = (props) => {
+const SchedulePicker = ({initDate, finalDate}) => {
 
-    const [selection, setSelection] = useState([])
+    const [activeSelection, setActiveSelection] = useState(new DateSelection({openingDate: null, color: 'rgba(60, 60, 60, 0.5)'}));
+    const [selectionSet, setSelectionSet] = useState([]);
+    
     
     const generateDatePickers = (initDate, finalDate) => {
         let datePickers = []        
@@ -49,18 +52,17 @@ const SchedulePicker = (props) => {
                     year={year}
                     initDate={initDate}
                     finalDate={finalDate} 
-                    selection={selection}
-                    setSelection={setSelection}
+                    activeSelection={activeSelection}
+                    setActiveSelection={setActiveSelection}
+                    selectionSet={selectionSet}
+                    setSelectionSet={setSelectionSet}
                 />
             )
         }          
         return datePickers;        
     }
 
-    const datePickers = generateDatePickers(props.initDate, props.finalDate)   
-    useEffect(() => {
-    console.log('selections changed:', selection)
-    }, [selection])
+    const datePickers = generateDatePickers(initDate, finalDate)   
 
     return (
         <div className='schedule-picker'>
@@ -69,15 +71,16 @@ const SchedulePicker = (props) => {
                 {datePickers}
             </div>
 
-            <SelectedDates selection={selection}/>
+            <SelectedDates selectionSet={selectionSet}/>
                 
-            {selection[0] !== null &&
+            {selectionSet[0] !== null &&
                 <TimePicker 
-                selection={selection}
-                setSelection={setSelection} />
+                selectionSet={selectionSet}
+                setSelectionSet={setSelectionSet} />
             }
         </div>
     );
 };
+
 
 export default SchedulePicker;
