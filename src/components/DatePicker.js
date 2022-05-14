@@ -9,10 +9,11 @@ const DayTiles = ({cal, days, initDate, finalDate, selectionSet, setSelectionSet
     function dayTileClicked(e) {
         const tile = e.target;
         const date = new Date(cal.year, cal.month, parseInt(tile.textContent));
-        let sel = new DateSelection({openingDate:null});
+        
 
         // initial or complete active selection -> save new opening date
         if (activeSelection.blank() || activeSelection.complete()) {
+            let sel = new DateSelection({openingDate:null});
             sel.openingDate = date;
             sel.closingDate = null;
             sel.color = 'rgba(60, 60, 60, 0.5)';
@@ -20,6 +21,7 @@ const DayTiles = ({cal, days, initDate, finalDate, selectionSet, setSelectionSet
         } 
         // complete the selection if incomplete (and assume that the color is immediately assigned)
         else if (activeSelection.incomplete()) {
+            let sel = new DateSelection({openingDate:null});
             sel.openingDate = activeSelection.openingDate;
             sel.closingDate = date;
             sel.color = 'rgba(60, 60, 60, 0.5)';
@@ -84,8 +86,10 @@ const DatePicker = (props) => {
     // }, [props.selectionSet])  // update on stringified object to catch any value changes
 
     useEffect(() => {
+        console.log('activeSelection changed')
         // if the new active selection concerns this particular month's calendar, assign colors
         if (props.activeSelection.complete() && props.activeSelection.includesMonth(props.month, props.year)) {
+            console.log('activeSelection concerns month', props.year, props.month)
             let start = new Date(props.year, props.month, 1);     // first day of the month
             let finish = new Date(props.year, props.month+1, 0);  // last day of the month
                     
@@ -100,14 +104,13 @@ const DatePicker = (props) => {
                 
                 let dayIndex = days.findIndex(it => it.date.getTime() === day.getTime())
                 if (dayIndex !== -1) {
-                    console.log('index:', dayIndex)
                     daysCopy[dayIndex].color = props.activeSelection.color;
                 }
             }
             setDays(daysCopy);
             
         }
-    }, [props.activeSelection])
+    }, [props.selectionSet])
     
 
 

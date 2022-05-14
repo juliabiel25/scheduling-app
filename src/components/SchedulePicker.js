@@ -24,9 +24,8 @@ const SelectedDates = ({selectionSet}) => {
 
 const SchedulePicker = ({initDate, finalDate}) => {
 
-    const [activeSelection, setActiveSelection] = useState(new DateSelection({openingDate: null}));
+    const [activeSelection, setActiveSelection] = useState(new DateSelection({openingDate: null, color: 'rgba(60, 60, 60, 0.5)'}));
     const [selectionSet, setSelectionSet] = useState([]);
-
     
     
     const generateDatePickers = (initDate, finalDate) => {
@@ -82,5 +81,6 @@ const SchedulePicker = ({initDate, finalDate}) => {
         </div>
     );
 };
+
 
 export default SchedulePicker;
