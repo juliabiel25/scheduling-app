@@ -4,34 +4,32 @@ import DateSelection from '../utils/DateSelection';
 import "../styles/DatePicker.css";
 
 
-const DayTiles = (props) => {
+const DayTiles = ({cal, days, initDate, finalDate, selectionSet, setSelectionSet, activeSelection, setActiveSelection}) => {
 
     function dayTileClicked(e) {
         const tile = e.target;
-        const date = new Date(props.cal.year, props.cal.month, parseInt(tile.textContent));
-        let prevSelection = props.selection.at(-1);
-        console.log('prev', prevSelection);
+        const date = new Date(cal.year, cal.month, parseInt(tile.textContent));
+        let sel = new DateSelection({openingDate:null});
 
-        // initial selection
-        if (props.selection.length === 0) {
-            let sel = new DateSelection({ openingDate: date, color:  'rgba(60, 60, 60, 0.5)'});
-            props.setSelection([sel]);
+        // initial or complete active selection -> save new opening date
+        if (activeSelection.blank() || activeSelection.complete()) {
+            sel.openingDate = date;
+            sel.closingDate = null;
+            sel.color = 'rgba(60, 60, 60, 0.5)';
+            setActiveSelection(sel);
         } 
-        else {
-            // start new selection
-            if (prevSelection.complete()) {
-                props.setSelection([...props.selection, new DateSelection({ openingDate: date, color:  'rgba(60, 60, 60, 0.5)' })]);
-            }
-            // complete previous selection
-            else {       
-                prevSelection.closingDate = date;     
-                props.setSelection([...props.selection.slice(0, props.selection.length - 1), prevSelection]);
-            }
-        } 
+        // complete the selection if incomplete (and assume that the color is immediately assigned)
+        else if (activeSelection.incomplete()) {
+            sel.openingDate = activeSelection.openingDate;
+            sel.closingDate = date;
+            sel.color = 'rgba(60, 60, 60, 0.5)';
+            setSelectionSet([...selectionSet, sel]);
+            setActiveSelection(sel);
+        }
     }
 
     return(
-        props.cal.days.map(           
+        days.map(           
             day => (
                 <div  
                     key={ `${day.isCurrentMonth.toString()}-${day.date.toString()}` }
@@ -41,7 +39,7 @@ const DayTiles = (props) => {
                         ${day.isCurrentMonth ? 'current-month-tile' : 'previousMonthTile'}`
                     }
                     onClick={ day.isEnabled ? dayTileClicked : undefined }
-                    style={ day.color ? { backgroundColor: day.color } : { backgroundColor: null } }
+                    style={ {backgroundColor: day.color} }
                 >
                         { day.date.getDate() }
                 </div>
@@ -60,29 +58,59 @@ const WeekdayLabels = (props) => {
 
 const DatePicker = (props) => {   
 
+    let cal =  new Calendar(
+        props.month, 
+        props.year, 
+        props.initDate, 
+        props.finalDate)
+
+    const [days, setDays] = useState(cal.days);              
     
-    const [cal, setCal] = useState(
-        new Calendar(
-            props.month, 
-            props.year, 
-            props.initDate, 
-            props.finalDate));  
-            
+    // useEffect(() => {
+    //     // for now: parse through all selections
+    //     // TODO find a way to store the info on which state array element changed (to optimize)
+    //     let daysToColor = []    // [day index, color]
+    //     for (let selection of props.selectionSet)
+    //         for (let i in days) 
+    //             if (selection.includes(days[i].date)) 
+    //                 daysToColor.push([i, selection.color])
+
+    //     let daysCopy = days;
+    //     for (let [ i, color ] of daysToColor) {
+    //         daysCopy[i].color = color;
+    //     }
+    //     setDays(daysCopy);
     
+    // }, [props.selectionSet])  // update on stringified object to catch any value changes
+
     useEffect(() => {
-        // for now: parse through all selections
-        // TODO find a way to store the info on which state array element changed (to optimize)
-        for (let selection of props.selection) {
-            for (let i in cal.days) {
-                if (selection.includes(cal.days[i].date)) {
-                    let newCal = cal;
-                    newCal.days[i].color = selection.color;
-                    setCal(newCal)
-                }                    
+        // if the new active selection concerns this particular month's calendar, assign colors
+        if (props.activeSelection.complete() && props.activeSelection.includesMonth(props.month, props.year)) {
+            let start = new Date(props.year, props.month, 1);     // first day of the month
+            let finish = new Date(props.year, props.month+1, 0);  // last day of the month
+                    
+            
+            if (props.activeSelection.startsInMonth(props.month, props.year))
+            start = props.activeSelection.openingDate;
+            if (props.activeSelection.endsInMonth(props.month, props.year))
+            finish = props.activeSelection.closingDate;
+
+            let daysCopy = days;
+            for (let day = start; day <= finish; day.setDate(day.getDate() + 1)) {
+                
+                let dayIndex = days.findIndex(it => it.date.getTime() === day.getTime())
+                if (dayIndex !== -1) {
+                    console.log('index:', dayIndex)
+                    daysCopy[dayIndex].color = props.activeSelection.color;
+                }
             }
+            setDays(daysCopy);
+            
         }
+    }, [props.activeSelection])
     
-    }, [JSON.stringify(props.selection)])  // update on stringified object to catch any value changes
+
+
 
     return (
         <div className="date-picker">
@@ -93,10 +121,13 @@ const DatePicker = (props) => {
                 <WeekdayLabels cal={cal} />
                 <DayTiles 
                     cal={cal} 
+                    days={days}
                     initDate={props.initDate}
                     finalDate={props.finalDate}
-                    selection={props.selection} 
-                    setSelection={props.setSelection} />
+                    selectionSet={props.selectionSet} 
+                    setSelectionSet={props.setSelectionSet}
+                    activeSelection={props.activeSelection}
+                    setActiveSelection={props.setActiveSelection} />
             </div>
         </div>
     );

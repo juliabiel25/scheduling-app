@@ -35,7 +35,7 @@ class Calendar {
 			)
 			.map(
 				day => new Day({
-					date: new Date(this.year, this.month, day),
+					date: new Date(this.year, (this.month - 1) % 12, day),
 					isCurrentMonth: false,
 					isEnabled: false
 				})
