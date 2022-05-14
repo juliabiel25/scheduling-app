@@ -1,20 +1,28 @@
-export default class DateSelection {
-    constructor() {
-        this.selection = []
+class DateSelection {
+    constructor({
+        openingDate = null, 
+        closingDate = null, 
+        color = null
+    }) {
+        this.openingDate = openingDate;
+        this.closingDate = closingDate;
+        this.color = color;
     }
 
-    get selection() {
-        return this.selection
+    includes(day) {
+        return day >= this.openingDate && day <= this.closingDate;
     }
 
-    clear() {
-        this.selection = []
+    complete() {
+        return this.openingDate !== null && this.closingDate !== null;
     }
 
-    add(newSelection) {
-        this.selection.push(newSelection)
-    }
+    toString() {
+        if (this.complete()) 
+            return `${this.openingDate.toLocaleDateString("en-US")} - ${this.closingDate.toLocaleDateString("en-US")}`
+        return `${this.openingDate.toLocaleDateString("en-US")} - ...`
 
-    
+    }
 }
 
+export default DateSelection;

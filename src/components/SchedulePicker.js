@@ -6,7 +6,7 @@ import "../styles/SchedulePicker.css";
 const Selection = (props) => {
     return (
         <div className='selection'>
-            {props.selection[0].toLocaleDateString("en-US")} - {props.selection[1] === null ? '' : props.selection[1].toLocaleDateString("en-US")}
+            {props.selection.toString()}
         </div>)
 
 }

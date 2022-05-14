@@ -6,13 +6,15 @@ class Day {
 		isSelected = false,
 		isEnabled = true,
 		selectionGroup = undefined,
-		isCurrentMonth = true
+		isCurrentMonth = true,
+		color = null
 	}) {
 		this.date = date;
 		this.isSelected = isSelected;
 		this.isEnabled = isEnabled;
 		this.selectionGroup = selectionGroup;
 		this.isCurrentMonth = isCurrentMonth;
+		this.color = color;
 	}
 }
 
