@@ -18,9 +18,6 @@
     color: rgb(191, 191, 191);
 }
 
-.tile-enabled:hover {
-    background-color: rgb(250, 210, 49);
-}
 
 .tile-enabled {
     background-color: rgb(255, 255, 255);
@@ -31,5 +28,4 @@
     background-color: rgb(243, 242, 242);
     color:rgb(163, 163, 163);
 }
-  
   

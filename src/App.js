@@ -5,7 +5,7 @@ import SchedulePicker from './components/SchedulePicker';
 function App() {
 
   // months starting with 0
-  let initDate = new Date(2022, 0, 15) //current
+  let initDate = new Date(2022, 0, 23) //current
   let finalDate = new Date(2022, 2, 15)
 
 

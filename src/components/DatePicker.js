@@ -2,46 +2,126 @@ import { useState, useEffect } from 'react'
 import Calendar from '../utils/Calendar';
 import DateSelection from '../utils/DateSelection';
 import "../styles/DatePicker.css";
+import RGBAColor from '../utils/RGBAColor';
 
+const DayTile = props => {
+    const day = props.cal.days[props.dayIndex];
+    let calCopy = props.cal;
+    
+    useEffect(() => {
+        if(props.hoverSelection)    
+        {
+            if(
+                day.isEnabled
+            && ((day.date <=  props.hoverSelection.date && day.date >= props.activeSelection.openingDate)
+            || (day.date >= props.hoverSelection.date && day.date <= props.activeSelection.openingDate)))
+            {           
+                day.isHovered = true;              
+            }
+            else {
+                day.isHovered = false;                
+            }
 
-const DayTiles = ({cal, initDate, finalDate, selectionSet, setSelectionSet, activeSelection, setActiveSelection}) => {
+            props.setCal({
+                ...props.cal, 
+                days: [
+                    ...props.cal.days.slice(0, props.dayIndex), 
+                    day, 
+                    ...props.cal.days.slice(props.dayIndex + 1)
+                ]
+            })
+        }
+    }, [props.hoverSelection])
 
     function dayTileClicked(e) {
         const tile = e.target;
-        const date = new Date(cal.year, cal.month, parseInt(tile.textContent));
+        const date = new Date(props.cal.year, props.cal.month, parseInt(tile.textContent));
         
-        // initial or complete active selection -> save new opening date
-        if (activeSelection.blank() || activeSelection.complete()) {
-            let sel = new DateSelection({openingDate: date, color: 'rgba(60, 60, 60, 0.5)'});
-            setActiveSelection(sel);            
+        // initial or new selection
+        if (props.activeSelection.blank() || props.activeSelection.complete()) {
+            let sel = new DateSelection({openingDate: date, color: props.selectionColor});
+            props.setActiveSelection(sel);
+
+            // setup the onmouse event listener
+            props.setMouseOverListening(true);
         } 
 
         // complete the selection if incomplete (and assume that the color is immediately assigned)
-        else if (activeSelection.incomplete()) {
-            let sel = new DateSelection({openingDate:activeSelection.openingDate, closingDate: date, color: 'rgba(60, 60, 60, 0.5)'});
-            setSelectionSet([...selectionSet, sel]);
-            setActiveSelection(sel);
+        else if (props.activeSelection.incomplete()) {
+            let prevOpeningDate = props.activeSelection.openingDate;
+            let sel = new DateSelection({color: props.selectionColor});
+            if (prevOpeningDate > date){
+                sel.openingDate = date;
+                sel.closingDate = prevOpeningDate;
+            }
+            else {
+                sel.openingDate = prevOpeningDate;
+                sel.closingDate = date;
+            }
+            
+            let calCopy = props.cal;
+            calCopy.clearHover();
+            props.setCal(calCopy);
+            props.setSelectionSet([...props.selectionSet, sel]);
+            props.setActiveSelection(sel);
+            
+            // setup the onmouse event listener
+            props.setMouseOverListening(false);
         }
     }
 
+    // if tile is hovered --> set hover selection state
+    function dayTileHovered(e, day) {
+        props.setHoverSelection(day);
+    }
+
     return(
-        cal.days.map(           
-            day => (
-                <div  
-                    key={ `${day.isCurrentMonth.toString()}-${day.date.toString()}` }
-                    className={
-                        `day-tile 
-                        ${day.isEnabled ? 'tile-enabled' : 'tile-disabled'} 
-                        ${day.isCurrentMonth ? 'current-month-tile' : 'previousMonthTile'}`
-                    }
-                    onClick={ day.isEnabled ? dayTileClicked : undefined }
-                    style={ {backgroundColor: day.color} }
-                >
-                        { day.date.getDate() }
-                </div>
-            )
-        )
-    )
+        <div  
+            key={ `${day.isCurrentMonth.toString()}-${day.date.toString()}` }
+            className={
+                `day-tile 
+                ${day.isEnabled ? 'tile-enabled' : 'tile-disabled'} 
+                ${day.isCurrentMonth ? 'current-month-tile' : 'previousMonthTile'}
+                ${day.isHovered && !day.color ? 'tile-hovered' : ''}`
+            }
+            onClick={ day.isEnabled ? dayTileClicked : undefined }
+            // onMouseOver={ props.mouseOverListening ? (e) => dayTileHovered(e, day) : undefined}
+            onMouseOver={ props.activeSelection.incomplete() ? (e) => dayTileHovered(e, day) : undefined}
+            style={ day.isHovered ? 
+                    { backgroundColor: new RGBAColor({
+                        red: props.selectionColor.red,
+                        green: props.selectionColor.green,
+                        blue: props.selectionColor.blue,
+                        alpha: 0.4
+                    })}
+                    : 
+                    { backgroundColor: day.color }}
+        >
+            { day.date.getDate() }
+        </div>
+    )      
+}
+
+const DayTiles = (props) => {    
+    return(
+        props.cal.days.map((day, index) => 
+            <DayTile 
+                key={day.date}
+                dayIndex={index}
+                cal={props.cal}
+                setCal={props.setCal}
+                selectionSet={props.selectionSet}
+                selectionColor={props.selectionColor}
+                setSelectionSet={props.setSelectionSet}
+                hoverSelection={props.hoverSelection}
+                setHoverSelection={props.setHoverSelection}
+                activeSelection={props.activeSelection}
+                setActiveSelection={props.setActiveSelection}
+                mouseOverListening={props.mouseOverListening}
+                setMouseOverListening={props.setMouseOverListening}
+                />
+    ))
+    
 };
     
 const WeekdayLabels = (props) => {
@@ -62,8 +142,24 @@ const DatePicker = (props) => {
     );             
 
     useEffect(() => {
-        // if the new active selection concerns this particular month's calendar, assign colors
-        if (props.activeSelection.complete() && props.activeSelection.includesMonth(props.month, props.year)) {
+        
+        // selection inclomplete - assign color to the day opening a new selection
+        if (props.activeSelection.incomplete() && cal.includesDate(props.activeSelection.openingDate)) {
+            let dayIndex = cal.days.findIndex(it => it.date.getTime() === props.activeSelection.openingDate.getTime())                    
+            let modDay = cal.days[dayIndex];
+            modDay.color = props.activeSelection.color;
+            setCal({
+                ...cal, 
+                days: [
+                    ...cal.days.slice(0, dayIndex), 
+                    modDay, 
+                    ...cal.days.slice(dayIndex + 1)
+                ]
+            })
+        }
+
+        // if selection is complete - assign color to all the days within the selection
+        else if (props.activeSelection.complete() && props.activeSelection.includesMonth(props.month, props.year)) {
             let start = new Date(props.year, props.month, 1);     // first day of the month
             let finish = new Date(props.year, props.month+1, 0);  // last day of the month
             
@@ -89,10 +185,31 @@ const DatePicker = (props) => {
                 }
             }            
         }
+
     }, [props.activeSelection])
     
+    function dayTilesMouseOver(e, rootElementKey) {
+        if (e.target.className.includes('tile-enabled')) {
+            console.log('selection start:', rootElementKey)
+            console.log('selection end:', e.target.key)
 
+        }
+    }
 
+    function dayTilesClicked(e) {
+        if (e.target.className.includes('tile-enabled') && (props.activeSelection.blank() || props.activeSelection.complete())) {
+            console.log('mark as hovered:', e.target.style)
+            // change bg color of the initial selection tile
+            e.target.style.backgroundColor = props.selectionColor;
+
+            // set the onmouseover on the parent
+            console.log(e.target.parentNode)
+            e.target.parentNode.onmouseover = (mouseOverEvent) => dayTilesMouseOver(mouseOverEvent, e.target.key)
+        }
+        else if(props.activeSelection.incomplete()){
+            e.target.parentNode.onmouseover = null;
+        }
+    }
 
     return (
         <div className="date-picker">
@@ -103,13 +220,18 @@ const DatePicker = (props) => {
                 <WeekdayLabels cal={cal} />
                 <DayTiles 
                     cal={cal} 
-                    // days={days}
+                    setCal={setCal}
                     initDate={props.initDate}
                     finalDate={props.finalDate}
                     selectionSet={props.selectionSet} 
                     setSelectionSet={props.setSelectionSet}
+                    hoverSelection={props.hoverSelection}
+                    setHoverSelection={props.setHoverSelection}
                     activeSelection={props.activeSelection}
-                    setActiveSelection={props.setActiveSelection} />
+                    setActiveSelection={props.setActiveSelection} 
+                    selectionColor={props.selectionColor}
+                    setMouseOverListening={props.setMouseOverListening}
+                    />
             </div>
         </div>
     );

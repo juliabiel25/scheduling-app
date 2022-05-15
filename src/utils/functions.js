@@ -8,3 +8,4 @@ export const allEqual = arr => (
   arr.every(val => val === arr[0])
 )
   
+export const randomColor = () => `rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, 0.3)`;

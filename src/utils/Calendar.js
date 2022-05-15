@@ -5,13 +5,15 @@ class Day {
 		date = Date(),
 		isSelected = false,
 		isEnabled = true,
+		isHovered = false,
 		selectionGroup = undefined,
 		isCurrentMonth = true,
 		color = null
-	}) {
+	}){
 		this.date = date;
 		this.isSelected = isSelected;
 		this.isEnabled = isEnabled;
+		this.isHovered = isHovered;
 		this.selectionGroup = selectionGroup;
 		this.isCurrentMonth = isCurrentMonth;
 		this.color = color;
@@ -76,6 +78,22 @@ class Calendar {
 	}
   
 	getMonthName = () => this.monthNames[this.month];
+
+	includesDate = date => date >= this.currentMonthDays[0].date && date <= this.currentMonthDays.at(-1).date; 
+
+	rangeHover = (start, end, hoverColor) => {
+		for(let i in this.days)
+			if ((this.days[i].date <= end && this.days[i].date >= start)
+            || (this.days[i].date >= end && this.days[i].date <= start))
+				this.days[i].isHovered = true;
+			else
+				this.days[i].isHovered = false;
+	}
+
+	clearHover = () => {
+		for (let i in this.days)
+			this.days[i].isHovered = false;
+	}
 
 }
  
