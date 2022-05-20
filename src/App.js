@@ -6,16 +6,21 @@ function App() {
 
   // months starting with 0
   let initDate = new Date(2022, 0, 23) //current
-  let finalDate = new Date(2022, 2, 15)
+  let finalDate = new Date(2022, 3, 15)
 
 
   return (
     <div className="App">
+      
       <header>
         <p>Starting date: {initDate.getDate()}.{initDate.getMonth()}.{initDate.getYear()}</p>
         <p>Final date: {finalDate.getDate()}.{finalDate.getMonth()}.{finalDate.getYear()}</p>
       </header>
-      <SchedulePicker initDate={initDate} finalDate={finalDate} />
+
+      <SchedulePicker 
+        dateRange={[initDate, finalDate]} 
+      />
+
     </div>
   );
 }

@@ -21,10 +21,11 @@ class Day {
 }
 
 class Calendar {
-	constructor(month, year, initDate, finalDate) {
+	constructor(month, dateRange) {
 
-		this.year = year;
-		this.month = month;
+		const [initDate, finalDate] = dateRange;
+		this.year = month[1];
+		this.month = month[0];
 		this.numOfDays = new Date(this.year, this.month + 1, 0).getDate();
 		this.firstWeekday = new Date(this.year, this.month, 1).getDay();
 		this.offset = (this.firstWeekday + 6)%7;
