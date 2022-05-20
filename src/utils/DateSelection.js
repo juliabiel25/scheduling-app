@@ -9,19 +9,26 @@ class DateSelection {
         this.color = color;
     }
 
-    startsInMonth(month, year) {
-        return this.openingDate.getMonth() === month && this.openingDate.getFullYear() === year
+    startsInMonth(month) {
+        return (
+            this.openingDate.getMonth() === month.month 
+            && this.openingDate.getFullYear() === month.year
+        )
     }
 
-    endsInMonth(month, year) {
-        return this.closingDate.getMonth() === month && this.closingDate.getFullYear() === year
+    endsInMonth(month) {
+        return (
+            this.closingDate.getMonth() === month.month 
+            && this.closingDate.getFullYear() === month.year
+        )
     }
 
-    includesMonth(month, year) {
-        const monthFirst = new Date(year, month, 1);
-        const monthLast = new Date(year, month+1, 0);
-        return(
-            this.startsInMonth(month, year) || this.endsInMonth(month, year)
+    includesMonth(month) {
+        const monthFirst = new Date(month.year, month.month, 1);
+        const monthLast = new Date(month.year, month.month + 1, 0);
+        return (
+            this.startsInMonth(month) 
+            || this.endsInMonth(month)
             || (this.openingDate <= monthFirst && this.closingDate >= monthLast)
         )
     }
