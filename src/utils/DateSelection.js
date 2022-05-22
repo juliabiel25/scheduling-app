@@ -2,12 +2,18 @@ class DateSelection {
     constructor({
         openingDate = null, 
         closingDate = null, 
-        color = null
+        color = null,
+        selectionSetIndex = null
     }) {
         this.openingDate = openingDate;
         this.closingDate = closingDate;
         this.color = color;
+        this.selectionSetIndex = selectionSetIndex;
     }
+
+    // set selectionSetIndex when new activeSelection is initiated
+
+
 
     startsInMonth(month) {
         return (

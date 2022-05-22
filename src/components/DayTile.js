@@ -1,10 +1,18 @@
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DateSelection from "../utils/DateSelection";
 import RGBAColor from "../utils/RGBAColor";
 
 const DayTile = props => { 
     let day =  props.day.value;
     const setDay = props.day.set;
+
+    const [prevColor, setPrevColor] = useState(props.selectionSet.getColor());
+    const [color, setColor] = useState(props.selectionSet.getColor());
+    const prevColorRef = useRef();
+
+    useEffect(() => {
+        prevColorRef.current = color;
+    }, [color])
 
     // mark day as hovered or not on hoverSelection change
     useEffect(() => {
@@ -24,15 +32,20 @@ const DayTile = props => {
                     )
                 )
             ){           
-                newDay.isHovered = true;              
+                newDay.isHovered = true;  
+                
+                setPrevColor(color);
+                setColor(props.selectionSet.getColor())   
             }
             else {
-                newDay.isHovered = false;                
+                newDay.isHovered = false;   
+                setColor(prevColorRef.current);
+                newDay.selectionSetIndex = null;    
             }
 
             setDay(newDay)
         }
-    }, [props.hoverSelection.value, day, setDay, props.activeSelection.value, props.hoverSelection])
+    }, [props.hoverSelection.value])
 
     // mark day as selected on activeSelection change
     useEffect(() => {
@@ -51,16 +64,24 @@ const DayTile = props => {
                 )
             )
         ){           
-            newDay.isSelected = true;  
-            newDay.isHovered = false;            
+            newDay.isSelected = true; 
+            newDay.isHovered = false;  
+
+            
+            setPrevColor(color);
+            setColor(props.selectionSet.getColor())              
         }
 
         setDay(newDay)
     
-    }, [props.activeSelection.value, day, setDay])
+    }, [props.activeSelection.value])
 
 
-    function dayTileClicked(e) {        
+    function dayTileClicked(e) {    
+        // update color
+        setPrevColor(color);
+        setColor(props.selectionSet.getColor())   
+        
         // initial or new selection
         if (
             props.activeSelection.value.blank() 
@@ -109,7 +130,6 @@ const DayTile = props => {
         props.hoverSelection.set(day);
     }
 
-
     return(
         <div  
             key={ `${day.isCurrentMonth.toString()}-${day.date.toString()}` }
@@ -120,20 +140,30 @@ const DayTile = props => {
                 ${day.isHovered && !day.color ? 'tile-hovered' : ''}`
             }
             onClick={ day.isEnabled ? dayTileClicked : undefined }
-            // onMouseOver={ props.mouseOverListening ? (e) => dayTileHovered(e, day) : undefined}
             onMouseOver={ props.activeSelection.value.incomplete() ? () => dayTileHovered(day) : undefined}
-            style={ day.isHovered ? 
+            // style={ 
+            //     day.isHovered ?
+            //         { backgroundColor: new RGBAColor({
+            //             ...props.schedule[props.schedule.length - 1].color,
+            //             alpha: 0.4
+            //         })}
+            //         :
+            //         day.isSelected ?
+            //             { backgroundColor: props.schedule[props.schedule.length - 1].color } 
+            //         : {}
+            // }
+            style={ 
+                day.isHovered ?
                     { backgroundColor: new RGBAColor({
-                        red: props.activeSelection.value.color.red,
-                        green: props.activeSelection.value.color.green,
-                        blue: props.activeSelection.value.color.blue,
+                        ...color,
                         alpha: 0.4
                     })}
-                    : 
-                    day.isSelected ?  
-                    { backgroundColor: props.activeSelection.value.color.toString() }
-                    :
-                    { backgroundColor: day.colro }}
+                :
+                    day.isSelected ?
+                        { backgroundColor: color.toString() } 
+                : {}
+            }
+            // style={{ backgroundColor: color}}
         >
             { day.date.getDate() }
         </div>

@@ -93,8 +93,7 @@ const DatePicker = (props) => {
                 }
             }            
         }
-    }, [props.activeSelection])
-
+    }, [props.activeSelection, cal, props.month, props.year])
     
 
     const dayTiles = cal.days.map((day, index) => 
@@ -107,7 +106,9 @@ const DatePicker = (props) => {
             }}          
             hoverSelection={{...props.hoverSelection, clear: clearHover}}
             activeSelection={props.activeSelection}            
-            mouseOverListening={props.mouseOverListening} />
+            mouseOverListening={props.mouseOverListening}
+            selectionSet={props.selectionSet}
+            />
     )
 
     return (

@@ -1,18 +1,25 @@
 import DatePicker from './DatePicker';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import DateSelection from '../utils/DateSelection';
-import RGBAColor from '../utils/RGBAColor';
 
 const DatePickers = props => {
 
     const [activeSelection, setActiveSelection] = useState(
         new DateSelection({
-            openingDate: null, 
-            color: new RGBAColor({})
+            openingDate: null,
+            // TODO
+            selectionSetIndex: props.focusedSelectionSetIndex 
+            // color: props.getSelectionSetColor()
         }));
 
     const [hoverSelection, setHoverSelection] = useState(false);
     const [mouseOverListening, setMouseOverListening] = useState(false);
+
+    // if the activeSelection has been completed - add the selection to schedule
+    useEffect(() => {
+        if (activeSelection.complete())
+            props.selectionSet.addSelection(activeSelection);
+    }, [activeSelection])
 
     const recordActiveSelection = () => (
         props.addDateSelection(activeSelection)
@@ -40,7 +47,9 @@ const DatePickers = props => {
             recordActiveSelection={recordActiveSelection}
             hoverSelection={{value: hoverSelection, set: setHoverSelection }}
             activeSelection={{value: activeSelection, set: setActiveSelection}}
-            mouseOverListening={{value: mouseOverListening, set: setMouseOverListening}} />
+            mouseOverListening={{value: mouseOverListening, set: setMouseOverListening}}
+            selectionSet={props.selectionSet}
+            />
     )); 
 
     return(

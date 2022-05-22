@@ -6,16 +6,16 @@ class Day {
 		isSelected = false,
 		isEnabled = true,
 		isHovered = false,
-		selectionGroup = undefined,
 		isCurrentMonth = true,
+		selectionSet = null,
 		color = null
 	}){
 		this.date = date;
 		this.isSelected = isSelected;
 		this.isEnabled = isEnabled;
 		this.isHovered = isHovered;
-		this.selectionGroup = selectionGroup;
 		this.isCurrentMonth = isCurrentMonth;
+		this.selectionSet = selectionSet
 		this.color = color;
 	}
 }
