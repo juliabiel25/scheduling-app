@@ -1,48 +1,35 @@
 import DatePickers from './DatePickers'
 import React, { useState, useEffect } from 'react'
-import DateSelectionSet from '../utils/SelectionSet'
 import "../styles/SchedulePicker.css";
+import DateSelectionSet from '../utils/DateSelectionSet';
+import SelectionSetNav from './SelectionSetNav';
+import RGBAColor from '../utils/RGBAColor';
+import DateSelection from '../utils/DateSelection';
 
-
-const SelectionSet = props => {
-
-    const selectionSetClicked = () => {
-        props.setFocusedSelectionSetIndex(props.selectionSet.index)
-    }
-
-    return (
-        <div 
-            className={
-                `
-                date-selection-set 
-                ${props.focusedSelectionSetIndex === props.selectionSet.index ? 'focused-selection-set' : ''}
-                `
-            }
-            onClick={selectionSetClicked}
-        >
-            Selection set <br/>
-            {props.selectionSet.dates.map(selection => (
-                <div className='date-selection' key={selection.toString()}>
-                    {selection.openingDate.toLocaleDateString("en-US")} - {selection.closingDate.toLocaleDateString("en-US")}
-                </div>
-            ))}
-        </div>
-    )
+export interface SchedulePickerProps {
+    dateRange: [Date, Date];
 }
 
-const SchedulePicker = props => {
+const SchedulePicker: React.FC<SchedulePickerProps> = props => {
 
-    const [schedule, setSchedule] = useState([new DateSelectionSet({})]);
-    const [focusedSelectionSetIndex, setFocusedSelectionSetIndex] = useState(0)
+    const [schedule, setSchedule] = useState<DateSelectionSet[]>([new DateSelectionSet()]);
+    const [focusedSelectionSetIndex, setFocusedSelectionSetIndex] = useState<number>(0)
 
-    const getSelectionSetColor = () => {
-        if (typeof schedule[focusedSelectionSetIndex] !== undefined) {
-            return schedule[focusedSelectionSetIndex].color;
+    const getSelectionSetColor = (index: number = focusedSelectionSetIndex): RGBAColor | undefined => {
+        if (typeof schedule[index] !== undefined) {
+            return schedule[index].color;
         }            
     };
 
-    // add a new date selection to the selection set of given index
-    const addDateSelection = (dateSelection) => {
+    const getSelectionSetIndex = (): number => {
+        if (typeof schedule[focusedSelectionSetIndex] !== undefined) {
+            return schedule[focusedSelectionSetIndex].index;
+        }
+        return 0;            
+    };
+
+    // add a new date selection to the selection set currently in focus
+    const addDateSelection = (dateSelection: DateSelection): void => {
         const index = focusedSelectionSetIndex;
         setSchedule (prevSchedule => (
             [
@@ -59,36 +46,31 @@ const SchedulePicker = props => {
         ));
     }
 
-    const switchSelectionSets = (fromIndex, toIndex, date) => {
+    // if a day tile was assigned to a new selection set - switch selection sets
+    const switchSelectionSets = (from: number, to: number, date: Date): void => {
         console.log(`switch selection sets
         \n\tday: ${date}
-        \n\tfrom: ${fromIndex}
-        \n\tto: ${toIndex}`);
+        \n\tfrom: ${from}
+        \n\tto: ${to}`);
     }
-
+    
+    // if a new selection set was added, put it in focus
     useEffect(() => {
-        // if a new selection set was added, put it in focus
           setFocusedSelectionSetIndex(schedule.length - 1);
     }, [schedule.length])   
 
-    useEffect(() => {
-      console.log('focused selection set changed:', focusedSelectionSetIndex)
-    }, [focusedSelectionSetIndex])   
-
-
     // create a new selection set and return it's index in the schedule array
-    const newSelectionSet = () => {
+    const newSelectionSet = (): number => {
         const prevScheduleLen = schedule.length;
         setSchedule (prevSchedule => [
             ...prevSchedule, 
-            new DateSelectionSet({index: prevSchedule.length})
+            new DateSelectionSet(prevSchedule.length)
         ]);
         return prevScheduleLen - 1;        
     }
   
-
-    let selectionSets = schedule.map((selectionSet, i) => (
-        <SelectionSet
+    const selectionSets = schedule.map((selectionSet, i) => (
+        <SelectionSetNav
             key={selectionSet.index}
             selectionSet={selectionSet}
             focusedSelectionSetIndex={focusedSelectionSetIndex}
@@ -104,6 +86,7 @@ const SchedulePicker = props => {
                 focusedSelectionSetIndex={focusedSelectionSetIndex}
                 selectionSet={{
                     getColor: getSelectionSetColor,
+                    getIndex: getSelectionSetIndex,
                     addSelection: addDateSelection,
                     switch: switchSelectionSets
                 }}
