@@ -29,20 +29,19 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   const setDay = props.day.set;
 
   const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
-  const [color, setColor] = useState<RGBAColor | undefined>(
-    props.selectionSet.getColor(),
-  );
+  const [color, setColor] = useState<RGBAColor | undefined>();
+
   const [selectionSetIndex, setSelectionSetIndex] = useState<
     number | undefined
   >(undefined);
 
-  useEffect(() => {
-    console.log('selectionSetIndex changed:', selectionSetIndex);
-  }, [selectionSetIndex]);
+  // useEffect(() => {
+  //   console.log('selectionSetIndex changed:', selectionSetIndex);
+  // }, [selectionSetIndex]);
 
-  useEffect(() => {
-    console.log('color changed!', {});
-  }, [color]);
+  // useEffect(() => {
+  //   console.log('color changed!', {});
+  // }, [color]);
 
   // mark day as hovered or not on hoverSelection change
   useEffect(() => {
@@ -60,8 +59,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           setDay(newDay);
           setColor((prevColor) => {
             setPrevColor(prevColor);
-            // return props.selectionSet.getColor();
-            return new RGBAColor({red:100, green: 210, blue: 99, alpha: 1.});
+            return props.selectionSet.getColor();
           });
         }
       } else {
@@ -97,6 +95,12 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   }, [props.activeSelection.value]);
 
   function dayTileClicked() {
+    
+    setColor((prevColor) => {
+      setPrevColor(prevColor);
+      return props.selectionSet.getColor();
+    });
+
     // if the active selection is not incomplete - make a new selection
     if (
       props.activeSelection.value.blank() ||

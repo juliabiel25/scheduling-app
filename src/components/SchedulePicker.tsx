@@ -15,6 +15,20 @@ const SchedulePicker: React.FC<SchedulePickerProps> = props => {
     const [schedule, setSchedule] = useState<DateSelectionSet[]>([new DateSelectionSet()]);
     const [focusedSelectionSetIndex, setFocusedSelectionSetIndex] = useState<number>(0)
 
+    useEffect(() => {
+      console.log('schedule has changed:', schedule.map(selectionSet => (
+          {
+              selectionSetIndex: selectionSet.index,
+              color: selectionSet.color
+          }
+      )))
+    }, [schedule])
+    
+    useEffect(() => {
+        console.log('focused selection set:', focusedSelectionSetIndex);
+    }, [focusedSelectionSetIndex])
+    
+
     const getSelectionSetColor = (index: number = focusedSelectionSetIndex): RGBAColor | undefined => {
         if (typeof schedule[index] !== undefined) {
             return schedule[index].color;
