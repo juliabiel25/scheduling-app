@@ -17,3 +17,12 @@
   padding: 1em;
 }
 
+.date-selection-sets {
+  gap: 0.5em;
+}
+
+.date-selection-set {
+  padding: 1em;
+  border: 1px solid;
+}
+

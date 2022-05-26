@@ -1,13 +1,12 @@
 import "./styles/index.css";
 import "./styles/App.css";
+import React from 'react'
 import SchedulePicker from './components/SchedulePicker';
 
-function App() {
+const App: React.FC = () => {
 
-  // months starting with 0
-  let initDate = new Date(2022, 0, 3) //current
-  let finalDate = new Date(2022, 0, 30)
-
+  let initDate = new Date(2022, 0, 3) 
+  let finalDate = new Date(2022, 3, 30)
 
   return (
     <div className="App">
@@ -22,6 +21,6 @@ function App() {
       />
     </div>
   );
-}
+};
 
 export default App;

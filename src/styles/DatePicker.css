@@ -1,3 +1,9 @@
+/*
+ideas: 
+make the selection bounds rounded
+*/
+
+
 .day-tiles {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
