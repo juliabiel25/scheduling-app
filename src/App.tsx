@@ -6,7 +6,7 @@ import SchedulePicker from './components/SchedulePicker';
 const App: React.FC = () => {
 
   let initDate = new Date(2022, 0, 3) 
-  let finalDate = new Date(2022, 0, 30)
+  let finalDate = new Date(2022, 3, 30)
 
   return (
     <div className="App">

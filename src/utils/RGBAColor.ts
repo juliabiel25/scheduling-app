@@ -8,7 +8,7 @@ export default class RGBAColor{
         red = Math.floor(Math.random()*255), 
         green = Math.floor(Math.random()*255), 
         blue = Math.floor(Math.random()*255), 
-        alpha = 1.0
+        alpha = 0.6
     }){
         this.red = red;
         this.green = green;

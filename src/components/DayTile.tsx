@@ -31,17 +31,27 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
   const [color, setColor] = useState<RGBAColor | undefined>();
 
+  const [prevSelectionSetIndex, setPrevSelectionSetIndex] = useState<
+    number | undefined
+  >();
   const [selectionSetIndex, setSelectionSetIndex] = useState<
     number | undefined
   >(undefined);
 
-  // useEffect(() => {
-  //   console.log('selectionSetIndex changed:', selectionSetIndex);
-  // }, [selectionSetIndex]);
-
-  // useEffect(() => {
-  //   console.log('color changed!', {});
-  // }, [color]);
+  // on selectionSetIndex change swap selections in the schedule state
+  useEffect(() => {
+    if (
+      prevSelectionSetIndex !== undefined &&
+      selectionSetIndex !== undefined &&
+      prevSelectionSetIndex !== selectionSetIndex
+    ) {
+      props.selectionSet.switch(
+        prevSelectionSetIndex,
+        selectionSetIndex,
+        day.date,
+      );
+    }
+  }, [selectionSetIndex]);
 
   // mark day as hovered or not on hoverSelection change
   useEffect(() => {
@@ -85,17 +95,20 @@ const DayTile: React.FC<DayTileProps> = (props) => {
         (day.date >= props.activeSelection.value.openingDate &&
           day.date <= props.activeSelection.value.closingDate))
     ) {
+      setColor(props.selectionSet.getColor());
+      setSelectionSetIndex((prevIndex) => {
+        setPrevSelectionSetIndex(prevIndex);
+        return props.selectionSet.getIndex();
+      });
+
       let newDay = day;
       newDay.isSelected = true;
       newDay.isHovered = false;
-      setColor(props.selectionSet.getColor());
-      setSelectionSetIndex(props.selectionSet.getIndex());
       setDay(newDay);
     }
   }, [props.activeSelection.value]);
 
   function dayTileClicked() {
-    
     setColor((prevColor) => {
       setPrevColor(prevColor);
       return props.selectionSet.getColor();
@@ -103,8 +116,8 @@ const DayTile: React.FC<DayTileProps> = (props) => {
 
     // if the active selection is not incomplete - make a new selection
     if (
-      props.activeSelection.value.blank() ||
-      props.activeSelection.value.complete()
+      props.activeSelection.value.isBlank() ||
+      props.activeSelection.value.isComplete()
     ) {
       let newSelection = new DateSelection({
         openingDate: day.date,
@@ -119,7 +132,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
     }
 
     // complete the active selection if it's been incomplete
-    else if (props.activeSelection.value.incomplete()) {
+    else if (props.activeSelection.value.isIncomplete()) {
       let prevOpeningDate = props.activeSelection.value.openingDate;
       let newSelection = new DateSelection({});
 
@@ -158,7 +171,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
                 ${day.isHovered && !day.color ? 'tile-hovered' : ''}`}
       onClick={day.isEnabled ? dayTileClicked : undefined}
       onMouseOver={
-        props.activeSelection.value.incomplete()
+        props.activeSelection.value.isIncomplete()
           ? () => dayTileHovered(day.date)
           : undefined
       }

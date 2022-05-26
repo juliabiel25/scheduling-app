@@ -1,4 +1,4 @@
-class DateSelection {
+class DateSelection{
   openingDate?: Date;
   closingDate?: Date;
   selectionSetIndex?: number;
@@ -47,25 +47,57 @@ class DateSelection {
       : false;
   }
 
-  blank(): boolean {
+  getLength(): number {
+    return this.openingDate && this.closingDate
+      ? Math.ceil(
+          (this.closingDate.getTime() - this.openingDate.getTime()) /
+            (1000 * 3600 * 24),
+        )
+      : 0;
+  }
+
+  isBlank(): boolean {
     return !this.openingDate && !this.closingDate;
   }
 
-  complete(): boolean {
+  isComplete(): boolean {
     return !!this.openingDate && !!this.closingDate;
   }
 
-  incomplete(): boolean {
+  isIncomplete(): boolean {
     return !!this.openingDate && !this.closingDate;
   }
-  
+
   toString(): string {
-    if (this.complete())
+    if (this.isComplete())
       return `${this.openingDate?.toLocaleDateString(
         'en-US',
       )} - ${this.closingDate?.toLocaleDateString('en-US')}`;
     return `${this.openingDate?.toLocaleDateString('en-US')} - ...`;
   }
 }
+
+interface CompleteDateSelectionIn {
+  openingDate: Date;
+  closingDate: Date;
+  selectionSetIndex?: number;
+}
+
+export class CompleteDateSelection extends DateSelection {
+  openingDate: Date;
+  closingDate: Date;
+
+  constructor({
+    openingDate,
+    closingDate,
+    selectionSetIndex,
+  }: CompleteDateSelectionIn) {
+    super({});
+    this.openingDate = openingDate;
+    this.closingDate = closingDate;
+    this.selectionSetIndex = selectionSetIndex;
+  }
+}
+
 
 export default DateSelection;

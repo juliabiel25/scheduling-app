@@ -37,7 +37,7 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
 
   // if the activeSelection has been completed - add the selection to schedule
   useEffect(() => {
-    if (activeSelection.complete())
+    if (activeSelection.isComplete())
       props.selectionSet.addSelection(activeSelection);
   }, [activeSelection]);
 
