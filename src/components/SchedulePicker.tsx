@@ -9,6 +9,7 @@ import ScheduleNavigation from './ScheduleNavigation';
 
 export interface SchedulePickerProps {
   dateRange: [Date, Date];
+  monthsPerPage: number;
 }
 
 const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
@@ -103,6 +104,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   return (
     <div className="schedule-picker">
       <DatePickers
+        monthsPerPage={props.monthsPerPage}
         dateRange={props.dateRange}
         selectionSet={{
           getColor: getSelectionSetColor,
@@ -111,6 +113,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
           removeDate: removeFromSelectionSet,
         }}
       />
+
       <ScheduleNavigation
         schedule={schedule}
         newSelectionSet={newSelectionSet}
