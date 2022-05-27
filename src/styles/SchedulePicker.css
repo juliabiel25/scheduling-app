@@ -6,7 +6,7 @@
   
 .date-picker, .time-picker {
     border: 1px solid lightgray;
-    padding: 0.7rem;
+    padding: 1rem;
     border-radius: 10px;
     width: fit-content;
     height: fit-content;
