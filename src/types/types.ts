@@ -3,7 +3,7 @@ import RGBAColor from '../utils/RGBAColor';
 
 export type selectionSetProp = {
   getColor: (index?: number) => RGBAColor | undefined;
-  getIndex: () => number;
+  getFocusedId: number;
   addSelection: (selection: DateSelection) => void;
-  switch: (from: number, to: number, date: Date) => void;
+  removeDate: (setIndex: number, date: Date) => void;
 };

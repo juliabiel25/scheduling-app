@@ -1,4 +1,4 @@
-class DateSelection{
+class DateSelection {
   openingDate?: Date;
   closingDate?: Date;
   selectionSetIndex?: number;
@@ -98,6 +98,5 @@ export class CompleteDateSelection extends DateSelection {
     this.selectionSetIndex = selectionSetIndex;
   }
 }
-
 
 export default DateSelection;

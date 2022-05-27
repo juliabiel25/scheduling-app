@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { selectionSetProp } from '../types/types';
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
@@ -22,36 +22,33 @@ export interface DayTileProps {
     set: (listen: boolean) => void;
   };
   selectionSet: selectionSetProp;
+  // isSelectionEdge: (date: Date, selectionSetId: number) => string | boolean;
 }
 
 const DayTile: React.FC<DayTileProps> = (props) => {
   let day = props.day.value;
   const setDay = props.day.set;
 
-  const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
   const [color, setColor] = useState<RGBAColor | undefined>();
-
-  const [prevSelectionSetIndex, setPrevSelectionSetIndex] = useState<
+  const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
+  const [selectionSetId, setSelectionSetId] = useState<number | undefined>();
+  const [prevSelectionSetId, setPrevSelectionSetId] = useState<
     number | undefined
   >();
-  const [selectionSetIndex, setSelectionSetIndex] = useState<
-    number | undefined
-  >(undefined);
+  const [selectionEdge, setSelectionEdge] = useState<string | boolean>(false);
 
-  // on selectionSetIndex change swap selections in the schedule state
+  // on selectionSetId change remove the date from the previous selection set
+  // and check whether the tile is on the selection edge
   useEffect(() => {
     if (
-      prevSelectionSetIndex !== undefined &&
-      selectionSetIndex !== undefined &&
-      prevSelectionSetIndex !== selectionSetIndex
+      prevSelectionSetId !== undefined &&
+      selectionSetId !== undefined &&
+      prevSelectionSetId !== selectionSetId
     ) {
-      props.selectionSet.switch(
-        prevSelectionSetIndex,
-        selectionSetIndex,
-        day.date,
-      );
+      props.selectionSet.removeDate(prevSelectionSetId, day.date);
+      // setSelectionEdge(props.isSelectionEdge(day.date, selectionSetId));
     }
-  }, [selectionSetIndex]);
+  }, [selectionSetId]);
 
   // mark day as hovered or not on hoverSelection change
   useEffect(() => {
@@ -96,9 +93,9 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           day.date <= props.activeSelection.value.closingDate))
     ) {
       setColor(props.selectionSet.getColor());
-      setSelectionSetIndex((prevIndex) => {
-        setPrevSelectionSetIndex(prevIndex);
-        return props.selectionSet.getIndex();
+      setSelectionSetId(prevId => {
+        setPrevSelectionSetId(prevId);
+        return props.selectionSet.getFocusedId;
       });
 
       let newDay = day;
@@ -168,7 +165,14 @@ const DayTile: React.FC<DayTileProps> = (props) => {
                     ? 'current-month-tile'
                     : 'previousMonthTile'
                 }
-                ${day.isHovered && !day.color ? 'tile-hovered' : ''}`}
+                ${day.isHovered && !day.color ? 'tile-hovered' : ''}
+                ${
+                  selectionEdge === 'left'
+                    ? 'selection-edge-left'
+                    : selectionEdge === 'right'
+                    ? 'selection-edge-right'
+                    : ''
+                }`}
       onClick={day.isEnabled ? dayTileClicked : undefined}
       onMouseOver={
         props.activeSelection.value.isIncomplete()
@@ -178,10 +182,11 @@ const DayTile: React.FC<DayTileProps> = (props) => {
       style={
         day.isHovered
           ? {
-              backgroundColor: new RGBAColor({
-                ...color,
-                alpha: 0.4,
-              }).toString(),
+              // backgroundColor: new RGBAColor({
+              //   ...color,
+              //   alpha: 0.4,
+              // }).toString(),
+              backgroundColor: color?.opacity(0.4).toString(),
             }
           : day.isSelected
           ? { backgroundColor: color?.toString() }

@@ -10,15 +10,12 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      
       {/* <header>
         <p>Starting date: {initDate.getDate()}.{initDate.getMonth()}.{initDate.getYear()}</p>
         <p>Final date: {finalDate.getDate()}.{finalDate.getMonth()}.{finalDate.getYear()}</p>
       </header> */}
 
-      <SchedulePicker 
-        dateRange={[initDate, finalDate]} 
-      />
+      <SchedulePicker monthsPerPage={2} dateRange={[initDate, finalDate]} />
     </div>
   );
 };

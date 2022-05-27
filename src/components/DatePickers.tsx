@@ -1,48 +1,31 @@
 import DatePicker from './DatePicker';
 import React, { useState, useEffect } from 'react';
 import DateSelection from '../utils/DateSelection';
-import DateSelectionSet from '../utils/DateSelectionSet';
 import { selectionSetProp } from '../types/types';
-import Day from '../utils/Day';
+import '../styles/DatePickers.css';
 
-{
-  /* <DatePickers 
-dateRange={props.dateRange}
-newSelectionSet={newSelectionSet}
-focusedSelectionSetIndex={focusedSelectionSetIndex}
-selectionSet={{
-    getColor: getSelectionSetColor,
-    getIndex: getSelectionSetIndex,
-    addSelection: addDateSelection,
-    switch: switchSelectionSets
-}} */
-}
 
 export interface DatePickersProps {
   dateRange: [Date, Date];
-  newSelectionSet: (selectionSet: DateSelectionSet) => void;
-  focusedSelectionSetIndex: number;
+  monthsPerPage: number;
   selectionSet: selectionSetProp;
 }
 
 const DatePickers: React.FC<DatePickersProps> = (props) => {
   const [activeSelection, setActiveSelection] = useState<DateSelection>(
     new DateSelection({
-      selectionSetIndex: props.focusedSelectionSetIndex,
+      selectionSetIndex: props.selectionSet.getFocusedId,
     }),
   );
-
   const [hoverSelection, setHoverSelection] = useState<Date | null>(null);
   const [mouseOverListening, setMouseOverListening] = useState<boolean>(false);
+  const [datePickerScroll, setDatePickerScroll] = useState<number>(0);
 
   // if the activeSelection has been completed - add the selection to schedule
   useEffect(() => {
     if (activeSelection.isComplete())
       props.selectionSet.addSelection(activeSelection);
   }, [activeSelection]);
-
-  // const recordActiveSelection = (): void =>
-  //   props.selectionSet.addSelection(activeSelection);
 
   let month = props.dateRange[0].getMonth();
   let year = props.dateRange[0].getFullYear();
@@ -65,7 +48,6 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
       key={month.toString() + year.toString()}
       month={[month, year]}
       dateRange={props.dateRange}
-      // recordActiveSelection={recordActiveSelection}
       hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
       activeSelection={{ value: activeSelection, set: setActiveSelection }}
       mouseOverListening={{
@@ -76,7 +58,30 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
     />
   ));
 
-  return <div className="date-picker-list">{datePickers}</div>;
+  const scrollForward = () => {
+    setDatePickerScroll((prev) =>
+      prev + props.monthsPerPage < datePickers.length ? prev + 1 : prev,
+    );
+  };
+
+  const scrollBackward = () => {
+    setDatePickerScroll((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  return (
+    <div className="date-picker-list">
+      <button className="datepickers-nav-btn" onClick={scrollBackward}>
+        previous month
+      </button>
+      {datePickers.slice(
+        datePickerScroll,
+        datePickerScroll + props.monthsPerPage,
+      )}
+      <button className="datepickers-nav-btn" onClick={scrollForward}>
+        next month
+      </button>
+    </div>
+  );
 };
 
 export default DatePickers;
