@@ -1,26 +1,26 @@
-export default class RGBAColor{
-    red: number;
-    green: number;
-    blue: number;
-    alpha: number;
+export default class RGBAColor {
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
 
-    constructor({
-        red = Math.floor(Math.random()*255), 
-        green = Math.floor(Math.random()*255), 
-        blue = Math.floor(Math.random()*255), 
-        alpha = 0.6
-    }){
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.alpha = alpha;
-    }
+  constructor({
+    red = Math.floor(Math.random() * 255),
+    green = Math.floor(Math.random() * 255),
+    blue = Math.floor(Math.random() * 255),
+    alpha = 0.6,
+  }) {
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    this.alpha = alpha;
+  }
 
-    toString(): string {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
-    }
+  toString(): string {
+    return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
+  }
 
-    setOpacity(alpha: number): void {
-        this.alpha = alpha;
-    }
+  setOpacity(alpha: number): void {
+    this.alpha = alpha;
+  }
 }

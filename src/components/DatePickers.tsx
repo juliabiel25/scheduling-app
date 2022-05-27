@@ -1,22 +1,7 @@
 import DatePicker from './DatePicker';
 import React, { useState, useEffect } from 'react';
 import DateSelection from '../utils/DateSelection';
-import DateSelectionSet from '../utils/DateSelectionSet';
 import { selectionSetProp } from '../types/types';
-import Day from '../utils/Day';
-
-{
-  /* <DatePickers 
-dateRange={props.dateRange}
-newSelectionSet={newSelectionSet}
-focusedSelectionSetIndex={focusedSelectionSetIndex}
-selectionSet={{
-    getColor: getSelectionSetColor,
-    getIndex: getSelectionSetIndex,
-    addSelection: addDateSelection,
-    switch: switchSelectionSets
-}} */
-}
 
 export interface DatePickersProps {
   dateRange: [Date, Date];
@@ -40,9 +25,6 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
       props.selectionSet.addSelection(activeSelection);
   }, [activeSelection]);
 
-  // const recordActiveSelection = (): void =>
-  //   props.selectionSet.addSelection(activeSelection);
-
   let month = props.dateRange[0].getMonth();
   let year = props.dateRange[0].getFullYear();
   let months = [[month, year]];
@@ -64,7 +46,6 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
       key={month.toString() + year.toString()}
       month={[month, year]}
       dateRange={props.dateRange}
-      // recordActiveSelection={recordActiveSelection}
       hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
       activeSelection={{ value: activeSelection, set: setActiveSelection }}
       mouseOverListening={{

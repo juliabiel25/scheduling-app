@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { selectionSetProp } from '../types/types';
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
@@ -38,18 +38,14 @@ const DayTile: React.FC<DayTileProps> = (props) => {
     number | undefined
   >(undefined);
 
-  // on selectionSetIndex change swap selections in the schedule state
+  // on selectionSetIndex change remove the date from the previous selection set
   useEffect(() => {
     if (
       prevSelectionSetIndex !== undefined &&
       selectionSetIndex !== undefined &&
       prevSelectionSetIndex !== selectionSetIndex
     ) {
-      props.selectionSet.switch(
-        prevSelectionSetIndex,
-        selectionSetIndex,
-        day.date,
-      );
+      props.selectionSet.removeDate(prevSelectionSetIndex, day.date);
     }
   }, [selectionSetIndex]);
 

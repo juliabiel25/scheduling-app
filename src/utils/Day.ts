@@ -6,7 +6,7 @@ export default class Day {
   isHovered: boolean;
   isCurrentMonth: boolean;
   selectionSetIndex: number | null;
-  color: RGBAColor | null;  // might not be neccessary 
+  color: RGBAColor | null; // might not be neccessary
 
   constructor(
     date: Date,

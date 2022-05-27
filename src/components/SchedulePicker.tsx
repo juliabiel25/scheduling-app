@@ -2,14 +2,11 @@ import DatePickers from './DatePickers';
 import React, { useState, useEffect } from 'react';
 import '../styles/SchedulePicker.css';
 import DateSelectionSet from '../utils/DateSelectionSet';
-import SelectionSetNav from './SelectionSetNavigation';
 import RGBAColor from '../utils/RGBAColor';
 import {
-  addDays,
-  subtractDays,
   generateDatesInRange,
 } from '../utils/functions';
-import DateSelection, { CompleteDateSelection } from '../utils/DateSelection';
+import DateSelection from '../utils/DateSelection';
 import SelectionSetNavigation from './SelectionSetNavigation';
 
 export interface SchedulePickerProps {
@@ -28,7 +25,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   }, [focusedSelectionSetIndex]);
 
   /**
-   * Return the assigned color of the date selection set specified by given index.
+   * Returns the assigned color of the date selection set specified by given index.
    * By default index is set to focusedSelectionSetIndex.
    * @param {number | undefined} index - the index of a date selection set within schedule.dates[].
    * @returns {RGBAColor | undefined} - the color of the date selection set.
@@ -36,19 +33,22 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   const getSelectionSetColor = (
     index: number = focusedSelectionSetIndex,
   ): RGBAColor | undefined => {
-    if (typeof schedule[index] !== undefined) {
+    if (typeof schedule[index] !== 'undefined') {
       return schedule[index].color;
     }
   };
 
   const getSelectionSetIndex = (): number => {
-    if (typeof schedule[focusedSelectionSetIndex] !== undefined) {
+    if (typeof schedule[focusedSelectionSetIndex] !== 'undefined') {
       return schedule[focusedSelectionSetIndex].index;
     }
     return 0;
   };
 
-  // add a new date selection to the selection set currently in focus
+  /**
+   * Adds the given dateSelection to the currently focused selection set
+   * @param {DateSelection} dateSelection -
+   */
   const addDateSelection = (dateSelection: DateSelection): void => {
     const index = focusedSelectionSetIndex;
     if (dateSelection.openingDate && dateSelection.closingDate) {
@@ -70,28 +70,18 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   };
 
   // if a day tile was assigned to a new selection set - switch selection sets in the schedule state
-  const switchSelectionSets = (from: number, to: number, date: Date): void => {
-    console.log(`switch selection sets
-        day: ${date.toLocaleDateString('en-US')}
-        from: ${from}
-        to: ${to}`);
-
-    // find and remove the date from the original date selection set
-    // const newDates = schedule[from].dates.filter(
-    //   (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
-    // );
-
+  const removeFromSelectionSet = (setIndex: number, date: Date): void => {
     setSchedule((prevSchedule) => [
-      ...prevSchedule.slice(0, from),
+      ...prevSchedule.slice(0, setIndex),
 
       new DateSelectionSet({
-        index: prevSchedule[from].index,
-        dates: prevSchedule[from].dates.filter(
+        index: prevSchedule[setIndex].index,
+        dates: prevSchedule[setIndex].dates.filter(
           (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
         ),
-        color: prevSchedule[from].color,
+        color: prevSchedule[setIndex].color,
       }),
-      ...prevSchedule.slice(from + 1),
+      ...prevSchedule.slice(setIndex + 1),
     ]);
   };
 
@@ -119,7 +109,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
           getColor: getSelectionSetColor,
           getIndex: getSelectionSetIndex,
           addSelection: addDateSelection,
-          switch: switchSelectionSets,
+          removeDate: removeFromSelectionSet,
         }}
       />
       <SelectionSetNavigation

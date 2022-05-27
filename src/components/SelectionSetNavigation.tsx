@@ -10,7 +10,9 @@ export interface SelectionSetNavigationProps {
   setFocusedSelectionSetIndex: (index: number) => void;
 }
 
-const SelectionSetNavigation: React.FC<SelectionSetNavigationProps> = (props) => {
+const SelectionSetNavigation: React.FC<SelectionSetNavigationProps> = (
+  props,
+) => {
   const selectionSets = props.schedule.map((selectionSet) => (
     <SelectionSetTile
       key={selectionSet.index}
@@ -19,8 +21,6 @@ const SelectionSetNavigation: React.FC<SelectionSetNavigationProps> = (props) =>
       setFocusedSelectionSetIndex={props.setFocusedSelectionSetIndex}
     />
   ));
-
-  
 
   return (
     <div className="date-selection-navigation">

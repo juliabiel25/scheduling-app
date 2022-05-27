@@ -35,32 +35,33 @@ export const generateDateSelections = (
   dates: Date[],
   selectionSetIndex: number,
 ): CompleteDateSelection[] => {
- 
-  dates = dates.sort((a, b) => a < b ? -1 : 1)
-  let dateSelections: CompleteDateSelection[] = []
+  dates = dates.sort((a, b) => (a < b ? -1 : 1));
+  let dateSelections: CompleteDateSelection[] = [];
 
-  // foreach date, look for a joinable selection or make a new one 
+  // foreach date, look for a joinable selection or make a new one
   for (let date of dates) {
     let index = dateSelections.findIndex(
-      (selection) => addDays(selection.closingDate, 1).getTime() === date.getTime())
-  
-    if (index != -1) {
+      (selection) =>
+        addDays(selection.closingDate, 1).getTime() === date.getTime(),
+    );
+
+    if (index !== -1) {
       dateSelections = [
         ...dateSelections.slice(0, index),
         new CompleteDateSelection({
           openingDate: dateSelections[index].openingDate,
           closingDate: date,
-          selectionSetIndex: selectionSetIndex
+          selectionSetIndex: selectionSetIndex,
         }),
         ...dateSelections.slice(index + 1),
       ];
-    }
-
-    else {
+    } else {
       index = dateSelections.findIndex(
-        (selection) => subtractDays(selection.openingDate, 1).getTime() === date.getTime());
+        (selection) =>
+          subtractDays(selection.openingDate, 1).getTime() === date.getTime(),
+      );
 
-      if (index != -1) {
+      if (index !== -1) {
         dateSelections = [
           ...dateSelections.slice(0, index),
           new CompleteDateSelection({
@@ -70,17 +71,17 @@ export const generateDateSelections = (
           }),
           ...dateSelections.slice(index + 1),
         ];
-      }
-
-      else {
-        dateSelections.push(new CompleteDateSelection ({
-          openingDate: date,
-          closingDate: date,
-          selectionSetIndex: selectionSetIndex,
-        }));
+      } else {
+        dateSelections.push(
+          new CompleteDateSelection({
+            openingDate: date,
+            closingDate: date,
+            selectionSetIndex: selectionSetIndex,
+          }),
+        );
       }
     }
   }
 
-  return dateSelections;  
+  return dateSelections;
 };
