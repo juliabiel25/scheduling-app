@@ -23,4 +23,8 @@ export default class RGBAColor {
   setOpacity(alpha: number): void {
     this.alpha = alpha;
   }
+
+  opacity(alpha: number): RGBAColor {
+    return new RGBAColor({...this, alpha: alpha});
+  }
 }
