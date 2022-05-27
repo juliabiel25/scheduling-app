@@ -5,14 +5,13 @@ import { selectionSetProp } from '../types/types';
 
 export interface DatePickersProps {
   dateRange: [Date, Date];
-  focusedSelectionSetIndex: number;
   selectionSet: selectionSetProp;
 }
 
 const DatePickers: React.FC<DatePickersProps> = (props) => {
   const [activeSelection, setActiveSelection] = useState<DateSelection>(
     new DateSelection({
-      selectionSetIndex: props.focusedSelectionSetIndex,
+      selectionSetIndex: props.selectionSet.getFocusedId,
     }),
   );
 

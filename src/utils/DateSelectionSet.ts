@@ -1,25 +1,25 @@
 import RGBAColor from './RGBAColor';
 
 interface DateSelectionSetIn {
-  index: number;
+  id: number;
   dates?: Date[];
   times?: any; // update when the time picker is in the works
   color?: RGBAColor;
 }
 
 export default class DateSelectionSet {
-  index: number;
+  id: number;
   dates: Date[];
   times?: any;
   color: RGBAColor;
 
   constructor({
-    index = 0,
+    id = 1,
     dates = [],
     times = [],
     color = new RGBAColor({}),
   }: DateSelectionSetIn) {
-    this.index = index;
+    this.id = id;
     this.times = times;
     this.color = color;
     this.dates = dates;
