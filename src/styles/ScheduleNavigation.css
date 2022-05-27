@@ -3,6 +3,7 @@
    flex-direction: column;
    gap: .5rem;
    width: 20em;
+   max-height: min-content;
 }
 
 .date-selection-set {
@@ -25,9 +26,6 @@
 }
 
 .date-selection-set:not(.focused-selection-set):hover{
-    /* outline: 3px solid; */
-    /* outline-offset: -3px; */
-    /* box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px; */
     animation-name: tile-hover;
     animation-duration: .1s;
     animation-fill-mode: forwards;
@@ -44,13 +42,9 @@
     left: 40px;
     outline: 3px solid;
     outline-offset: -3px;
-    /* box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0; */
-    /* margin: 1em 0; */
-    /* left: 40px; */
-
 }
 
-button {
+.add-selection-set-btn {
     align-self:flex-end;
     margin: 0 0 0.3em 0;
     padding: 0.4em;
@@ -59,8 +53,11 @@ button {
     height: fit-content;
     font-size: xx-large;
     border: none;
-    color: darkgray
+    color: darkgray;
+    min-width: min-content;
+    min-height: min-content;
 }
+
 
 button:hover {
     box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;

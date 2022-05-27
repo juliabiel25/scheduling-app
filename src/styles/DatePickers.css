@@ -1,0 +1,22 @@
+.arrow-up{
+  position: relative;
+  top: -0.15em;
+  /* background-color: aqua; */
+  padding: 0.3em .5em .5em .5em;
+  border-radius: 50%;
+}
+
+.arrow-down{
+  position: relative;
+  top: -0.4em;
+}
+
+.datepickers-nav-btn {
+    padding: 0.4em;
+    border-radius: 30px;
+    height: fit-content;
+    border: none;
+    color: darkgray;
+    min-width: 100%;
+    min-height: min-content;
+}
