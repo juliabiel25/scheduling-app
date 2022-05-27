@@ -1,6 +1,6 @@
 import { subtractDays } from '../src/utils/functions';
 
-describe('testing the addDays utility function', () => {
+describe('testing the subtractDays utility function', () => {
   test('date - 0 should result in the same date', () => {
     const date = new Date();
     expect(subtractDays(date, 0)).toStrictEqual(date);

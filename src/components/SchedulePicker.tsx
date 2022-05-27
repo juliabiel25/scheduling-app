@@ -2,10 +2,15 @@ import DatePickers from './DatePickers';
 import React, { useState, useEffect } from 'react';
 import '../styles/SchedulePicker.css';
 import DateSelectionSet from '../utils/DateSelectionSet';
-import SelectionSetNav from './SelectionSetNav';
+import SelectionSetNav from './SelectionSetNavigation';
 import RGBAColor from '../utils/RGBAColor';
-import { addDays, subtractDays } from '../utils/functions';
+import {
+  addDays,
+  subtractDays,
+  generateDatesInRange,
+} from '../utils/functions';
 import DateSelection, { CompleteDateSelection } from '../utils/DateSelection';
+import SelectionSetNavigation from './SelectionSetNavigation';
 
 export interface SchedulePickerProps {
   dateRange: [Date, Date];
@@ -17,16 +22,6 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   ]);
   const [focusedSelectionSetIndex, setFocusedSelectionSetIndex] =
     useState<number>(0);
-
-  //   useEffect(() => {
-  //     console.log(
-  //       'schedule has changed:',
-  //       schedule.map((selectionSet) => ({
-  //         selectionSetIndex: selectionSet.index,
-  //         color: selectionSet.color,
-  //       })),
-  //     );
-  //   }, [schedule]);
 
   useEffect(() => {
     console.log('focused selection set:', focusedSelectionSetIndex);
@@ -57,17 +52,16 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   const addDateSelection = (dateSelection: DateSelection): void => {
     const index = focusedSelectionSetIndex;
     if (dateSelection.openingDate && dateSelection.closingDate) {
-      const newDateSelection = new CompleteDateSelection({
-        openingDate: dateSelection.openingDate,
-        closingDate: dateSelection.closingDate,
-        selectionSetIndex: index,
-      });
+      const dates = generateDatesInRange(
+        dateSelection.openingDate,
+        dateSelection.closingDate,
+      );
 
       setSchedule((prevSchedule) => [
         ...prevSchedule.slice(0, index),
         new DateSelectionSet({
           index: index,
-          dates: [...prevSchedule[index].dates, newDateSelection],
+          dates: [...prevSchedule[index].dates, ...dates],
           color: prevSchedule[index].color,
         }),
         ...prevSchedule.slice(index + 1),
@@ -82,59 +76,23 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
         from: ${from}
         to: ${to}`);
 
-    // find and remove the date form the original date selection set
-    const datesIndex = schedule[from].dates.findIndex((dateSelection) =>
-      dateSelection.includesDay(date),
-    );
-    console.log(`   selection index of selectionSet.dates[]: `, datesIndex);
-    console.log(
-      `   splitting to: 
-            ${schedule[from].dates[datesIndex].openingDate.toLocaleDateString(
-              'en-US',
-            )} - ${subtractDays(date, 1).toLocaleDateString('en-US')}
-          and
-            ${addDays(date, 1).toLocaleDateString('en-US')} - ${
-        schedule[from].dates[datesIndex].closingDate.toLocaleDateString("en-US")
-      }`,
-    );
-    const newDates = [
-      ...schedule[from].dates.slice(0, datesIndex),
-      // new selection of dates predating the removed date
-      new CompleteDateSelection({
-        openingDate: schedule[from].dates[datesIndex].openingDate,
-        closingDate: subtractDays(date, 1),
-        selectionSetIndex: schedule[from].index,
-      }),
-      // new selection of dates post the removed date
-      new CompleteDateSelection({
-        openingDate: addDays(date, 1),
-        closingDate: schedule[from].dates[datesIndex].closingDate,
-        selectionSetIndex: schedule[from].index,
-      }),
-      ...schedule[from].dates.slice(datesIndex + 1),
-    ];
+    // find and remove the date from the original date selection set
+    // const newDates = schedule[from].dates.filter(
+    //   (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
+    // );
 
-    // apply the date removal
     setSchedule((prevSchedule) => [
       ...prevSchedule.slice(0, from),
+
       new DateSelectionSet({
         index: prevSchedule[from].index,
-        dates: newDates,
+        dates: prevSchedule[from].dates.filter(
+          (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
+        ),
         color: prevSchedule[from].color,
       }),
       ...prevSchedule.slice(from + 1),
     ]);
-    /*
-    removeDate(date: Date): void {
-    let index = this.dates.findIndex((dateSelection) =>
-      dateSelection.includesDay(date),
-    );
-    console.log(`removeDate(${date.toLocaleDateString('en-US')})::
-      dateSelection index:`, index);
-    
-    this.dates = 
-    }
-    */
   };
 
   // if a new selection set was added, put it in focus
@@ -152,20 +110,10 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
     return prevScheduleLen - 1;
   };
 
-  const selectionSets = schedule.map((selectionSet, i) => (
-    <SelectionSetNav
-      key={selectionSet.index}
-      selectionSet={selectionSet}
-      focusedSelectionSetIndex={focusedSelectionSetIndex}
-      setFocusedSelectionSetIndex={setFocusedSelectionSetIndex}
-    />
-  ));
-
   return (
     <div className="schedule-picker">
       <DatePickers
         dateRange={props.dateRange}
-        newSelectionSet={newSelectionSet}
         focusedSelectionSetIndex={focusedSelectionSetIndex}
         selectionSet={{
           getColor: getSelectionSetColor,
@@ -174,11 +122,12 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
           switch: switchSelectionSets,
         }}
       />
-      <div className="date-selection-sets">
-        Selections so far: <br />
-        {selectionSets}
-        <button onClick={newSelectionSet}>New Selection Set</button>
-      </div>
+      <SelectionSetNavigation
+        schedule={schedule}
+        newSelectionSet={newSelectionSet}
+        focusedSelectionSetIndex={focusedSelectionSetIndex}
+        setFocusedSelectionSetIndex={setFocusedSelectionSetIndex}
+      />
     </div>
   );
 };

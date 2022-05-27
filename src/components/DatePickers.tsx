@@ -20,7 +20,6 @@ selectionSet={{
 
 export interface DatePickersProps {
   dateRange: [Date, Date];
-  newSelectionSet: (selectionSet: DateSelectionSet) => void;
   focusedSelectionSetIndex: number;
   selectionSet: selectionSetProp;
 }

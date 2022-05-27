@@ -3,15 +3,15 @@ import DateSelection, { CompleteDateSelection } from './DateSelection';
 
 interface DateSelectionSetIn {
   index: number;
-  dates?: CompleteDateSelection[];
+  dates?: Date[];
   times?: any;  // update when the time picker is in the works
   color?: RGBAColor;
 }
 
 export default class DateSelectionSet {
   index: number;
-  dates: CompleteDateSelection[];
-  times?: any; 
+  dates: Date[];
+  times?: any;
   color: RGBAColor;
 
   constructor({
