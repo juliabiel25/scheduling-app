@@ -24,7 +24,7 @@ const ScheduleNavigation: React.FC<ScheduleNavigationProps> = (props) => {
 
   return (
     <div className="date-selection-navigation">
-      <button onClick={props.newSelectionSet}>+</button>
+      <button className='add-selection-set-btn 'onClick={props.newSelectionSet}>+</button>
       {selectionSets}
     </div>
   );
