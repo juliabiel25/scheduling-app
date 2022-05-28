@@ -8,17 +8,21 @@ import RGBAColor from '../utils/RGBAColor';
 interface StyledDayTileProps {
   tileColor: RGBAColor | undefined;
   isEnabled: boolean;
+  isHovered: boolean;
 }
 
 const StyledDayTile = styled.div<StyledDayTileProps>`
-  background-color: ${(props) => {
-    if (!props.isEnabled) {
-      return 'rgb(243, 242, 242)';
-    }
-    return props.tileColor?.toString() || null;
-  }};
-  border: ${(props) => props.isEnabled ? '1px solid lightgray' : null};
+  /* state-dependant properties */
+  background-color: ${(props) =>
+    !props.isEnabled
+      ? 'rgb(243, 242, 242)'
+      : props.isHovered
+      ? props.tileColor?.opacity(0.3).toString() || null
+      : props.tileColor?.opacity(0.9).toString() || null};
+  border: ${(props) => (props.isEnabled ? '1px solid lightgray' : null)};
   color: ${(props) => (!props.isEnabled ? 'rgb(163, 163, 163)' : null)};
+
+  /* static properties */
   display: flex;
   align-content: center;
   justify-content: center;
@@ -27,6 +31,7 @@ const StyledDayTile = styled.div<StyledDayTileProps>`
   border-radius: 50%;
   width: 1.4rem;
   height: 1.4rem;
+  transition: background-color 0.4s ease-out;
 `;
 
 export interface DayTileProps {
@@ -89,7 +94,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           setDay(newDay);
           setColor((prevColor) => {
             setPrevColor(prevColor);
-            return props.selectionSet.getColor()?.opacity(0.4);
+            return props.selectionSet.getColor();
           });
         }
       } else {
@@ -177,11 +182,12 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   function dayTileHovered(date: Date) {
     props.hoverSelection.set(date);
   }
- 
+
   return (
     <StyledDayTile
       tileColor={color}
       isEnabled={day.isEnabled}
+      isHovered={day.isHovered}
       onClick={day.isEnabled ? dayTileClicked : undefined}
       onMouseOver={
         props.activeSelection.value.isIncomplete()
