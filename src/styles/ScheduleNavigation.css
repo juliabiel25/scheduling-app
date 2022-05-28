@@ -13,33 +13,16 @@
     border-radius: 10px;
     box-sizing: border-box;
     left: 0;
-}
-
-@keyframes tile-hover {
-    from {left: 0}
-    to {left: 30px;}
-}
-
-@keyframes tile-unhover {
-    from {left: 30px;}
-    to {left: 0}
+    transition: left .15s ease-in;
 }
 
 .date-selection-set:not(.focused-selection-set):hover{
-    animation-name: tile-hover;
-    animation-duration: .1s;
-    animation-fill-mode: forwards;
-}
-
-.date-selection-set:not(.focused-selection-set):not(:hover){
-    animation-name: tile-unhover;
-    animation-duration: .1s;
-    animation-fill-mode: forwards;
+    left: 1em;
 }
 
 .focused-selection-set {
     position: relative;
-    left: 40px;
+    left: 1em;
     outline: 3px solid;
     outline-offset: -3px;
 }
