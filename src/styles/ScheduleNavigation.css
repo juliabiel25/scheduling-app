@@ -27,7 +27,7 @@
     outline-offset: -3px;
 }
 
-.add-selection-set-btn {
+/* .add-selection-set-btn {
     align-self:flex-end;
     margin: 0 0 0.3em 0;
     padding: 0.4em;
@@ -39,14 +39,14 @@
     color: darkgray;
     min-width: min-content;
     min-height: min-content;
-}
+} */
 
 
-button:disabled {
+/* button:disabled {
     visibility: hidden;
 }
 
 button:not(:disabled):hover {
     box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
     color: #222222
-}
+} */
