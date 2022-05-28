@@ -1,11 +1,17 @@
-import DatePickers from './DatePickers';
 import React, { useState, useEffect } from 'react';
-import '../styles/SchedulePicker.css';
+import styled from 'styled-components';
+import DatePickers from './DatePickers';
 import DateSelectionSet from '../utils/DateSelectionSet';
 import RGBAColor from '../utils/RGBAColor';
 import { generateDatesInRange } from '../utils/functions';
 import DateSelection from '../utils/DateSelection';
 import ScheduleNavigation from './ScheduleNavigation';
+
+const StyledSchedulePicker = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+`;
 
 export interface SchedulePickerProps {
   dateRange: [Date, Date];
@@ -102,7 +108,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   };
 
   return (
-    <div className="schedule-picker">
+    <StyledSchedulePicker>
       <DatePickers
         monthsPerPage={props.monthsPerPage}
         dateRange={props.dateRange}
@@ -113,7 +119,6 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
           removeDate: removeFromSelectionSet,
         }}
       />
-
       <ScheduleNavigation
         schedule={schedule}
         newSelectionSet={newSelectionSet}
@@ -121,7 +126,7 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
         focusedSelectionSet={focusedSelectionSet}
         setFocusedSelectionSet={setFocusedSelectionSet}
       />
-    </div>
+    </StyledSchedulePicker>
   );
 };
 
