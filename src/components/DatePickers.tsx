@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import DatePicker from './DatePicker';
 import DateSelection from '../utils/DateSelection';
 import { selectionSetProp } from '../types/types';
-import '../styles/DatePickers.css';
 
 const NavigationButton = styled.button<{}>`
   border: none;
