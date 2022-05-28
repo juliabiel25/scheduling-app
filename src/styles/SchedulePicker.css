@@ -3,14 +3,6 @@
     flex-direction: row;
     gap: 10px;
   }
-  
-.date-picker, .time-picker {
-    border: 1px solid lightgray;
-    padding: 1rem;
-    border-radius: 10px;
-    width: fit-content;
-    height: fit-content;
-}
 
 .active-selections {
   border: 1px solid grey;
