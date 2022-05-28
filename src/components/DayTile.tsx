@@ -1,8 +1,33 @@
 import { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { selectionSetProp } from '../types/types';
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
 import RGBAColor from '../utils/RGBAColor';
+
+interface StyledDayTileProps {
+  tileColor: RGBAColor | undefined;
+  isEnabled: boolean;
+}
+
+const StyledDayTile = styled.div<StyledDayTileProps>`
+  background-color: ${(props) => {
+    if (!props.isEnabled) {
+      return 'rgb(243, 242, 242)';
+    }
+    return props.tileColor?.toString() || null;
+  }};
+  border: ${(props) => props.isEnabled ? '1px solid lightgray' : null};
+  color: ${(props) => (!props.isEnabled ? 'rgb(163, 163, 163)' : null)};
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  margin: 3px;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+`;
 
 export interface DayTileProps {
   day: {
@@ -22,7 +47,6 @@ export interface DayTileProps {
     set: (listen: boolean) => void;
   };
   selectionSet: selectionSetProp;
-  // isSelectionEdge: (date: Date, selectionSetId: number) => string | boolean;
 }
 
 const DayTile: React.FC<DayTileProps> = (props) => {
@@ -35,7 +59,6 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   const [prevSelectionSetId, setPrevSelectionSetId] = useState<
     number | undefined
   >();
-  const [selectionEdge, setSelectionEdge] = useState<string | boolean>(false);
 
   // on selectionSetId change remove the date from the previous selection set
   // and check whether the tile is on the selection edge
@@ -66,7 +89,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           setDay(newDay);
           setColor((prevColor) => {
             setPrevColor(prevColor);
-            return props.selectionSet.getColor();
+            return props.selectionSet.getColor()?.opacity(0.4);
           });
         }
       } else {
@@ -93,7 +116,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           day.date <= props.activeSelection.value.closingDate))
     ) {
       setColor(props.selectionSet.getColor());
-      setSelectionSetId(prevId => {
+      setSelectionSetId((prevId) => {
         setPrevSelectionSetId(prevId);
         return props.selectionSet.getFocusedId;
       });
@@ -154,47 +177,20 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   function dayTileHovered(date: Date) {
     props.hoverSelection.set(date);
   }
-
+ 
   return (
-    <div
-      key={`${day.isCurrentMonth.toString()}-${day.date.toString()}`}
-      className={`day-tile 
-                ${day.isEnabled ? 'tile-enabled' : 'tile-disabled'} 
-                ${
-                  day.isCurrentMonth
-                    ? 'current-month-tile'
-                    : 'previousMonthTile'
-                }
-                ${day.isHovered && !day.color ? 'tile-hovered' : ''}
-                ${
-                  selectionEdge === 'left'
-                    ? 'selection-edge-left'
-                    : selectionEdge === 'right'
-                    ? 'selection-edge-right'
-                    : ''
-                }`}
+    <StyledDayTile
+      tileColor={color}
+      isEnabled={day.isEnabled}
       onClick={day.isEnabled ? dayTileClicked : undefined}
       onMouseOver={
         props.activeSelection.value.isIncomplete()
           ? () => dayTileHovered(day.date)
           : undefined
       }
-      style={
-        day.isHovered
-          ? {
-              // backgroundColor: new RGBAColor({
-              //   ...color,
-              //   alpha: 0.4,
-              // }).toString(),
-              backgroundColor: color?.opacity(0.4).toString(),
-            }
-          : day.isSelected
-          ? { backgroundColor: color?.toString() }
-          : {}
-      }
     >
       {day.date.getDate()}
-    </div>
+    </StyledDayTile>
   );
 };
 
