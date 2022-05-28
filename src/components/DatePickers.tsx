@@ -4,7 +4,6 @@ import DateSelection from '../utils/DateSelection';
 import { selectionSetProp } from '../types/types';
 import '../styles/DatePickers.css';
 
-
 export interface DatePickersProps {
   dateRange: [Date, Date];
   monthsPerPage: number;
@@ -70,14 +69,30 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
 
   return (
     <div className="date-picker-list">
-      <button className="datepickers-nav-btn" onClick={scrollBackward}>
+      <button
+        className="datepickers-nav-btn"
+        onClick={scrollBackward}
+        disabled={datePickerScroll > 0 ? false : true}
+      >
         previous month
       </button>
-      {datePickers.slice(
-        datePickerScroll,
-        datePickerScroll + props.monthsPerPage,
-      )}
-      <button className="datepickers-nav-btn" onClick={scrollForward}>
+      
+      <div className='datepickers-group'>
+        {datePickers.slice(
+          datePickerScroll,
+          datePickerScroll + props.monthsPerPage,
+        )}
+      </div>
+      
+      <button
+        className="datepickers-nav-btn"
+        onClick={scrollForward}
+        disabled={
+          datePickerScroll + props.monthsPerPage < datePickers.length
+            ? false
+            : true
+        }
+      >
         next month
       </button>
     </div>
