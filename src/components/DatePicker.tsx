@@ -1,10 +1,25 @@
 import { useState } from 'react';
+import styled from 'styled-components';
 import Calendar from '../utils/Calendar';
 import DayTile from './DayTile';
-import '../styles/DatePicker.css';
 import DateSelection from '../utils/DateSelection';
 import { selectionSetProp } from '../types/types';
 import Day from '../utils/Day';
+
+const StyledWeekdayLabel = styled.div`
+  color: rgb(191, 191, 191);
+`;
+
+const StyledDatePicker = styled.div`
+  border: 1px solid lightgrey;
+  padding: 1em;
+  border-radius: .6em;
+`;
+
+const StyledDateTiles = styled.div`
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+`;
 
 export interface DatePickerProps {
   month: [number, number];
@@ -34,9 +49,7 @@ const DatePicker: React.FC<DatePickerProps> = (props) => {
     });
 
   const weekdayLabels = cal.weekdayNames.map((wd) => (
-    <div key={wd} className="weekday-label">
-      {wd}
-    </div>
+    <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
   ));
 
   const dayTiles = cal.days.map((day, index) => (
@@ -54,15 +67,13 @@ const DatePicker: React.FC<DatePickerProps> = (props) => {
   ));
 
   return (
-    <div className="date-picker">
-      <div className="month-label">
-        {cal.getMonthName()} {cal.year}
-      </div>
-      <div className="day-tiles">
+    <StyledDatePicker>      
+      {cal.getMonthName()} {cal.year}
+      <StyledDateTiles>
         {weekdayLabels}
         {dayTiles}
-      </div>
-    </div>
+      </StyledDateTiles>
+    </StyledDatePicker>
   );
 };
 
