@@ -31,7 +31,14 @@ const StyledDayTile = styled.div<StyledDayTileProps>`
   border-radius: 50%;
   width: 1.4rem;
   height: 1.4rem;
-  transition: background-color 0.4s ease-out;
+  transition: background-color 0.4s ease-out, box-shadow 0.2s ease-out;
+  &:hover {
+    ${(props) =>
+      props.isEnabled
+        ? `box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,
+      rgba(60, 64, 67, 0.15) 0 4px 8px 3px;`
+        : null}
+  }
 `;
 
 export interface DayTileProps {

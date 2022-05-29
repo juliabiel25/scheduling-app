@@ -9,6 +9,7 @@ const NavigationButton = styled.button<{}>`
   width: 100%;
   border-radius: .6em;
   padding: .3em;
+  transition: box-shadow 0.2s ease-out;
   
   &:hover {
     box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,

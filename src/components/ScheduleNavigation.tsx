@@ -20,7 +20,8 @@ const StyledAddSelectionBtn = styled.button`
   font-size: xx-large;
   border: none;
   color: darkgray;
-  
+  transition: box-shadow 0.2s ease-out;
+
   &:hover {
     box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,
       rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
