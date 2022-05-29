@@ -1,7 +1,14 @@
-import "./styles/index.css";
-import "./styles/App.css";
 import React from 'react'
+import styled from 'styled-components';
 import SchedulePicker from './components/SchedulePicker';
+
+const StyledApp = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const App: React.FC = () => {
 
@@ -9,14 +16,9 @@ const App: React.FC = () => {
   let finalDate = new Date(2022, 3, 30)
 
   return (
-    <div className="App">
-      {/* <header>
-        <p>Starting date: {initDate.getDate()}.{initDate.getMonth()}.{initDate.getYear()}</p>
-        <p>Final date: {finalDate.getDate()}.{finalDate.getMonth()}.{finalDate.getYear()}</p>
-      </header> */}
-
+    <StyledApp>
       <SchedulePicker monthsPerPage={2} dateRange={[initDate, finalDate]} />
-    </div>
+    </StyledApp>
   );
 };
 

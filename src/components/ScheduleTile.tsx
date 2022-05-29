@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/ScheduleNavigation.css';
+import styled from 'styled-components';
 import { CompleteDateSelection } from '../utils/DateSelection';
 import DateSelectionSet from '../utils/DateSelectionSet';
 import { generateDateSelections } from '../utils/functions';
+import RGBAColor from '../utils/RGBAColor';
+
+interface StyledDateSelectionSetProps {
+  isFocused: boolean;
+  selectionColor: RGBAColor;
+}
+
+const StyledDateSelectionSet = styled.div<StyledDateSelectionSetProps>`
+  /* style-dependant properties */
+  background-color: ${(props) => props.selectionColor.opacity(0.3).toString()};
+
+  left: ${(props) => (props.isFocused ? '1em' : '0')};
+
+  outline: ${(props) =>
+    props.isFocused ? `3px solid ${props.selectionColor.toString()}` : null};
+
+  outline-offset: ${(props) => (props.isFocused ? '-3px' : null)};
+
+  ${(props) => (!props.isFocused ? '&:hover { left: 1em; }' : null)}
+
+  /* static properties */
+  position: relative;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 10px;
+  box-sizing: border-box;
+  transition: left 0.15s ease-in;
+`;
 
 export interface ScheduleTileProps {
   selectionSet: DateSelectionSet;
@@ -42,22 +70,13 @@ const ScheduleTile: React.FC<ScheduleTileProps> = (props) => {
     );
 
   return (
-    <div
-      className={`date-selection-set 
-        ${
-          props.focusedSelectionSet === props.selectionSet.id
-            ? 'focused-selection-set'
-            : ''
-        }`}
+    <StyledDateSelectionSet
       onClick={selectionSetClicked}
-      style={
-        { 
-          backgroundColor: props.selectionSet.color.opacity(0.2).toString(),
-          outlineColor: props.selectionSet.color.toString() 
-        }}
+      isFocused={props.focusedSelectionSet === props.selectionSet.id}
+      selectionColor={props.selectionSet.color}
     >
       {dateSelectionJSX}
-    </div>
+    </StyledDateSelectionSet>
   );
 };
 

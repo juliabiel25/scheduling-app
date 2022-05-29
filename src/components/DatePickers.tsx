@@ -1,8 +1,30 @@
-import DatePicker from './DatePicker';
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import DatePicker from './DatePicker';
 import DateSelection from '../utils/DateSelection';
 import { selectionSetProp } from '../types/types';
-import '../styles/DatePickers.css';
+
+const NavigationButton = styled.button<{}>`
+  border: none;
+  width: 100%;
+  border-radius: .6em;
+  padding: .3em;
+  
+  &:hover {
+    box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,
+    rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
+    color: #222222;
+  }
+  &:disabled {
+    visibility: hidden;
+  }
+`;
+
+const DatePickersGroup = styled.div<{}>`
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
+`;
 
 export interface DatePickersProps {
   dateRange: [Date, Date];
@@ -69,32 +91,29 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
 
   return (
     <div className="date-picker-list">
-      <button
-        className="datepickers-nav-btn"
+      <NavigationButton
         onClick={scrollBackward}
-        disabled={datePickerScroll > 0 ? false : true}
-      >
+        disabled={datePickerScroll > 0 ? false : true}>
         previous month
-      </button>
+      </NavigationButton>
       
-      <div className='datepickers-group'>
+      <DatePickersGroup>
         {datePickers.slice(
           datePickerScroll,
           datePickerScroll + props.monthsPerPage,
         )}
-      </div>
+      </DatePickersGroup>
       
-      <button
-        className="datepickers-nav-btn"
+      <NavigationButton
         onClick={scrollForward}
         disabled={
           datePickerScroll + props.monthsPerPage < datePickers.length
             ? false
             : true
-        }
-      >
+        }>
         next month
-      </button>
+      </NavigationButton>
+      
     </div>
   );
 };
