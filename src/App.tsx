@@ -13,7 +13,7 @@ const StyledApp = styled.div`
 const App: React.FC = () => {
 
   let initDate = new Date(2022, 0, 3) 
-  let finalDate = new Date(2022, 3, 30)
+  let finalDate = new Date(2022, 1, 15)
 
   return (
     <StyledApp>
