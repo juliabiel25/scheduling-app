@@ -57,10 +57,6 @@ const DatePickers = ({
   }, [activeSelection]);
 
   useEffect(() => {
-    console.log('Date picker scroll: ', datePickerScroll);
-  }, [datePickerScroll]);
-
-  useEffect(() => {
     if (dateRange.initDate && dateRange.finalDate) {
       // generate calendar data based on the date range limits
       let month = dateRange.initDate.getMonth();
@@ -81,7 +77,6 @@ const DatePickers = ({
       setCalendarData(months);
 
       // update scroll
-      // console.log(dateRange.getNumberOfMonths());
       // setDatePickerScroll(dateRange.getNumberOfMonths());
     } else {
       console.warn(

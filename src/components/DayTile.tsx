@@ -55,7 +55,6 @@ export type UpdatedDayProps = {
 
 export interface DayTileProps {
   day: Day;
-  setDay?: (day: Day) => void;
   updateDay: (props: UpdatedDayProps) => void;
   hoverSelection: {
     value: Date | null;
@@ -74,7 +73,6 @@ export interface DayTileProps {
 
 const DayTile = ({
   day,
-  setDay,
   updateDay,
   hoverSelection,
   activeSelection,
@@ -95,7 +93,6 @@ const DayTile = ({
       prevSelectionSetId !== selectionSetId
     ) {
       selectionSet.removeDate(prevSelectionSetId, day.date);
-      // setSelectionEdge(props.isSelectionEdge(day.date, selectionSetId));
     }
   }, [selectionSetId]);
 

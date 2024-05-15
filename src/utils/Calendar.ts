@@ -37,7 +37,6 @@ class Calendar {
       (day) => new Day(new Date(this.year, (this.month - 1) % 12, day), false),
     );
 
-    // console.log('date < dateRange.initDate: ', date < dateRange.initDate);
     this.currentMonthDays = range(1, this.numOfDays).map((day) => {
       const date = new Date(this.year, this.month, day);
 

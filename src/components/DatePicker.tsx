@@ -54,15 +54,10 @@ const DatePicker = ({
   const [days, setDays] = useState<Day[]>([]);
 
   useEffect(() => {
-    console.log('Days changed to: ', days);
-  }, [days]);
-
-  useEffect(() => {
     if (month && dateRange.initDate && dateRange.finalDate && !cal.current)
       try {
         // setCal(new Calendar(month, dateRange));
         cal.current = new Calendar(month, dateRange);
-        console.log('setting days to cal.current.days: ', cal.current.days);
         setDays(cal.current.days);
       } catch (e) {
         console.error('Generating a new calendar error: ', e);
@@ -83,26 +78,6 @@ const DatePicker = ({
   }
 
   const updateDay = (updatedDayProps: UpdatedDayProps, index: number): void => {
-    // setCal((prevCal) => {
-    //   if (!prevCal) {
-    //     console.error('Tried to update a day but there is no calendar object');
-    //     return undefined;
-    //   } else
-    //     console.log(
-    //       'updating cal to: ',
-    //       { updatedDayProps },
-    //       { ...prevCal.days[index], ...updatedDayProps },
-    //     );
-    //   return {
-    //     ...prevCal,
-    //     days: [
-    //       ...prevCal.days.slice(0, index),
-    //       { ...prevCal.days[index], ...updatedDayProps },
-    //       ...prevCal.days.slice(index + 1),
-    //     ],
-    //   };
-    // });
-    console.log('updating days with: ', { updatedDayProps });
     setDays((prevDays) => {
       return [
         ...prevDays.slice(0, index),
@@ -124,17 +99,7 @@ const DatePicker = ({
         {days.map((day, index) => (
           <DayTile
             key={day.date.toString()}
-            // day={{
-            //   value: day,
-            //   set: (newDay: Day) => {
-            //     console.log('setting day to: ', newDay);
-            //     replaceDay(newDay, index);
-            //   },
-            // }}
             day={day}
-            // setDay={(newDay: Day) => {
-            //   replaceDay(newDay, index);
-            // }}
             updateDay={(updatedDayProps: UpdatedDayProps) => {
               updateDay(updatedDayProps, index);
             }}
