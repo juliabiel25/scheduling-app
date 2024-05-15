@@ -1,6 +1,9 @@
-import React from 'react'
-import styled from 'styled-components';
+import React, { useState } from 'react';
+
+import MonthRange from './utils/MonthRange';
 import SchedulePicker from './components/SchedulePicker';
+import SchedulePickerLimits from './components/SchedulePickerLimits';
+import styled from 'styled-components';
 
 const StyledApp = styled.div`
   width: 100vw;
@@ -10,14 +13,41 @@ const StyledApp = styled.div`
   justify-content: center;
 `;
 
-const App: React.FC = () => {
+const App = () => {
+  const [dateRange, setDateRange] = useState<MonthRange>(
+    new MonthRange(null, null),
+  );
 
-  let initDate = new Date(2022, 0, 3) 
-  let finalDate = new Date(2022, 1, 15)
+  function onInitDateChange(date: Date | null) {
+    // const confirm = window.confirm(
+    //   'Changing the date ranges will erase all inputed data. Are you sure you want to change the date range?',
+    // );
+    // if (confirm) {
+    setDateRange((prev) => new MonthRange(date, prev.finalDate));
+  }
+
+  function onFinalDateChange(date: Date | null) {
+    // const confirm = window.confirm(
+    //   'Changing the date ranges will erase all inputed data. Are you sure you want to change the date range?',
+    // );
+    // if (confirm) {
+    setDateRange((prev) => new MonthRange(prev.initDate, date));
+    // }
+  }
 
   return (
     <StyledApp>
-      <SchedulePicker monthsPerPage={2} dateRange={[initDate, finalDate]} />
+      <div className="col center">
+        <SchedulePickerLimits
+          dateRange={dateRange}
+          onInitDateChange={onInitDateChange}
+          onFinalDateChange={onFinalDateChange}
+        />
+        <SchedulePicker
+          monthsPerPage={2}
+          dateRange={dateRange}
+        />
+      </div>
     </StyledApp>
   );
 };

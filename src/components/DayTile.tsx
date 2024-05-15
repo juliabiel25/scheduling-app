@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { selectionSetProp } from '../types/types';
+import { useEffect, useState } from 'react';
+
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
 import RGBAColor from '../utils/RGBAColor';
+import { selectionSetProp } from '../types/types';
+import styled from 'styled-components';
 
 interface StyledDayTileProps {
-  tileColor: RGBAColor | undefined;
+  tileColor: RGBAColor | null;
   isEnabled: boolean;
   isHovered: boolean;
 }
@@ -41,11 +42,20 @@ const StyledDayTile = styled.div<StyledDayTileProps>`
   }
 `;
 
+export type UpdatedDayProps = {
+  date?: Date;
+  isSelected?: boolean;
+  isEnabled?: boolean;
+  isHovered?: boolean;
+  isCurrentMonth?: boolean;
+  selectionSetIndex?: number | null;
+  color?: RGBAColor | null;
+  hoverColor?: RGBAColor | null;
+};
+
 export interface DayTileProps {
-  day: {
-    value: Day;
-    set: (day: Day) => void;
-  };
+  day: Day;
+  updateDay: (props: UpdatedDayProps) => void;
   hoverSelection: {
     value: Date | null;
     set: (date: Date | null) => void;
@@ -61,12 +71,14 @@ export interface DayTileProps {
   selectionSet: selectionSetProp;
 }
 
-const DayTile: React.FC<DayTileProps> = (props) => {
-  let day = props.day.value;
-  const setDay = props.day.set;
-
-  const [color, setColor] = useState<RGBAColor | undefined>();
-  const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
+const DayTile = ({
+  day,
+  updateDay,
+  hoverSelection,
+  activeSelection,
+  mouseOverListening,
+  selectionSet,
+}: DayTileProps) => {
   const [selectionSetId, setSelectionSetId] = useState<number | undefined>();
   const [prevSelectionSetId, setPrevSelectionSetId] = useState<
     number | undefined
@@ -80,92 +92,82 @@ const DayTile: React.FC<DayTileProps> = (props) => {
       selectionSetId !== undefined &&
       prevSelectionSetId !== selectionSetId
     ) {
-      props.selectionSet.removeDate(prevSelectionSetId, day.date);
-      // setSelectionEdge(props.isSelectionEdge(day.date, selectionSetId));
+      selectionSet.removeDate(prevSelectionSetId, day.date);
     }
   }, [selectionSetId]);
 
   // mark day as hovered or not on hoverSelection change
   useEffect(() => {
-    if (props.hoverSelection.value && day.isEnabled) {
+    if (hoverSelection.value && day.isEnabled) {
+      // if a selection was started and the day falls between the opening of the active selection and the hovered date (or the other way aroung)
       if (
-        props.activeSelection.value.openingDate &&
-        ((day.date <= props.hoverSelection.value &&
-          day.date >= props.activeSelection.value.openingDate) ||
-          (day.date >= props.hoverSelection.value &&
-            day.date <= props.activeSelection.value.openingDate))
+        activeSelection.value.openingDate &&
+        ((day.date <= hoverSelection.value &&
+          day.date >= activeSelection.value.openingDate) ||
+          (day.date >= hoverSelection.value &&
+            day.date <= activeSelection.value.openingDate))
       ) {
+        // record that the 'day' is hovered (if it's not marked as hovered already)
         if (!day.isHovered) {
-          let newDay = day;
-          newDay.isHovered = true;
-          setDay(newDay);
-          setColor((prevColor) => {
-            setPrevColor(prevColor);
-            return props.selectionSet.getColor();
-          });
+          updateDay({ isHovered: true, hoverColor: selectionSet.getColor() });
         }
       } else {
-        // if day is outside the current hover selection
+        // if 'day' was previously hovered but no longer falls between the current hover selection - unhover it
         if (day.isHovered) {
-          let newDay = day;
-          newDay.isHovered = false;
-          setDay(newDay);
-          setColor(prevColor);
+          updateDay({ isHovered: false, hoverColor: null });
         }
       }
     }
-  }, [props.hoverSelection.value]);
+  }, [hoverSelection.value]);
 
   // mark day as selected on activeSelection change
   useEffect(() => {
     if (
       day.isEnabled &&
-      props.activeSelection.value.openingDate &&
-      props.activeSelection.value.closingDate &&
-      ((day.date <= props.activeSelection.value.closingDate &&
-        day.date >= props.activeSelection.value.openingDate) ||
-        (day.date >= props.activeSelection.value.openingDate &&
-          day.date <= props.activeSelection.value.closingDate))
+      activeSelection.value.openingDate &&
+      activeSelection.value.closingDate &&
+      ((day.date <= activeSelection.value.closingDate &&
+        day.date >= activeSelection.value.openingDate) ||
+        (day.date >= activeSelection.value.openingDate &&
+          day.date <= activeSelection.value.closingDate))
     ) {
-      setColor(props.selectionSet.getColor());
       setSelectionSetId((prevId) => {
         setPrevSelectionSetId(prevId);
-        return props.selectionSet.getFocusedId;
+        return selectionSet.getFocusedId;
       });
 
-      let newDay = day;
-      newDay.isSelected = true;
-      newDay.isHovered = false;
-      setDay(newDay);
+      updateDay({
+        isSelected: true,
+        isHovered: false,
+        hoverColor: null,
+        color: selectionSet.getColor() ?? null,
+        selectionSetIndex: selectionSet.getFocusedId,
+      });
     }
-  }, [props.activeSelection.value]);
+  }, [activeSelection.value]);
 
   function dayTileClicked() {
-    setColor((prevColor) => {
-      setPrevColor(prevColor);
-      return props.selectionSet.getColor();
-    });
-
-    // if the active selection is not incomplete - make a new selection
-    if (
-      props.activeSelection.value.isBlank() ||
-      props.activeSelection.value.isComplete()
-    ) {
+    // if the active selection is already closed - make a new selection
+    if (activeSelection.value.isBlank() || activeSelection.value.isComplete()) {
       let newSelection = new DateSelection({
         openingDate: day.date,
       });
-      props.activeSelection.set(newSelection);
+      activeSelection.set(newSelection);
 
       // mark the first tile of the hover selection as hovered immediately
-      setDay({ ...day, isHovered: true });
+
+      updateDay({
+        isHovered: true,
+        hoverColor: selectionSet.getColor() ?? null,
+      });
 
       // toggle on the onmouse event listener
-      props.mouseOverListening.set(true);
+      mouseOverListening.set(true);
     }
 
     // complete the active selection if it's been incomplete
-    else if (props.activeSelection.value.isIncomplete()) {
-      let prevOpeningDate = props.activeSelection.value.openingDate;
+    else if (activeSelection.value.isIncomplete()) {
+      let prevOpeningDate = activeSelection.value.openingDate;
       let newSelection = new DateSelection({});
 
       // make sure the selection works both ways (later date -> earlier date and the reverse)
@@ -177,27 +179,28 @@ const DayTile: React.FC<DayTileProps> = (props) => {
         newSelection.closingDate = day.date;
       }
 
-      props.activeSelection.set(newSelection);
-      props.hoverSelection.set(null);
+      activeSelection.set(newSelection);
+      hoverSelection.set(null);
 
       // toggle off the onmouse event listener
-      props.mouseOverListening.set(false);
+      mouseOverListening.set(false);
     }
   }
 
   // if tile is hovered --> set hover selection state
   function dayTileHovered(date: Date) {
-    props.hoverSelection.set(date);
+    hoverSelection.set(date);
   }
 
   return (
     <StyledDayTile
-      tileColor={color}
+      className="no-select"
+      tileColor={day.hoverColor ?? day.color}
       isEnabled={day.isEnabled}
       isHovered={day.isHovered}
       onClick={day.isEnabled ? dayTileClicked : undefined}
       onMouseOver={
-        props.activeSelection.value.isIncomplete()
+        activeSelection.value.isIncomplete()
           ? () => dayTileHovered(day.date)
           : undefined
       }

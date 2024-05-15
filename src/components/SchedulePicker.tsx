@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
+
 import DatePickers from './DatePickers';
-import DateSelectionSet from '../utils/DateSelectionSet';
-import RGBAColor from '../utils/RGBAColor';
-import { generateDatesInRange } from '../utils/functions';
 import DateSelection from '../utils/DateSelection';
+import DateSelectionSet from '../utils/DateSelectionSet';
+import MonthRange from '../utils/MonthRange';
+import RGBAColor from '../utils/RGBAColor';
 import ScheduleNavigation from './ScheduleNavigation';
+import { generateDatesInRange } from '../utils/functions';
+import styled from 'styled-components';
 
 const StyledSchedulePicker = styled.div`
   display: flex;
@@ -14,19 +16,15 @@ const StyledSchedulePicker = styled.div`
 `;
 
 export interface SchedulePickerProps {
-  dateRange: [Date, Date];
+  dateRange: MonthRange;
   monthsPerPage: number;
 }
 
-const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
+const SchedulePicker = ({ dateRange, monthsPerPage }: SchedulePickerProps) => {
   const [schedule, setSchedule] = useState<DateSelectionSet[]>([
     new DateSelectionSet({ id: 1 }),
   ]);
   const [focusedSelectionSet, setFocusedSelectionSet] = useState<number>(1);
-
-  useEffect(() => {
-    console.log('focused selection set:', focusedSelectionSet);
-  }, [focusedSelectionSet]);
 
   /**
    * Returns the assigned color of the date selection set specified by given index.
@@ -110,8 +108,8 @@ const SchedulePicker: React.FC<SchedulePickerProps> = (props) => {
   return (
     <StyledSchedulePicker>
       <DatePickers
-        monthsPerPage={props.monthsPerPage}
-        dateRange={props.dateRange}
+        monthsPerPage={monthsPerPage}
+        dateRange={dateRange}
         selectionSet={{
           getColor: getSelectionSetColor,
           getFocusedId: focusedSelectionSet,

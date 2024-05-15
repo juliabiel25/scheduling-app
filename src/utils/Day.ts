@@ -1,4 +1,5 @@
 import RGBAColor from './RGBAColor';
+
 export default class Day {
   date: Date;
   isSelected: boolean;
@@ -7,15 +8,17 @@ export default class Day {
   isCurrentMonth: boolean;
   selectionSetIndex: number | null;
   color: RGBAColor | null; // might not be neccessary
+  hoverColor: RGBAColor | null; // might not be neccessary
 
   constructor(
     date: Date,
-    isSelected = false,
-    isEnabled = true,
-    isHovered = false,
+    isEnabled: boolean = true,
+    isSelected: boolean = false,
+    isHovered: boolean = false,
     isCurrentMonth = true,
-    selectionSetIndex = null,
-    color = null,
+    selectionSetIndex: number | null = null,
+    color: RGBAColor | null = null,
+    hoverColor: RGBAColor | null = null,
   ) {
     this.date = date;
     this.isSelected = isSelected;
@@ -24,5 +27,6 @@ export default class Day {
     this.isCurrentMonth = isCurrentMonth;
     this.selectionSetIndex = selectionSetIndex;
     this.color = color;
+    this.hoverColor = hoverColor;
   }
 }

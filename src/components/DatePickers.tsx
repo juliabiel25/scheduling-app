@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useEffect, useState } from 'react';
+
 import DatePicker from './DatePicker';
 import DateSelection from '../utils/DateSelection';
+import MonthRange from '../utils/MonthRange';
 import { selectionSetProp } from '../types/types';
+import styled from 'styled-components';
 
 const NavigationButton = styled.button<{}>`
   border: none;
   width: 100%;
-  border-radius: .6em;
-  padding: .3em;
+  border-radius: 0.6em;
+  padding: 0.3em;
   transition: box-shadow 0.2s ease-out;
-  
+
   &:hover {
     box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,
-    rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
+      rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
     color: #222222;
   }
   &:disabled {
@@ -24,65 +26,90 @@ const NavigationButton = styled.button<{}>`
 const DatePickersGroup = styled.div<{}>`
   display: flex;
   flex-direction: column;
-  gap: .5em;
+  gap: 0.5em;
 `;
 
 export interface DatePickersProps {
-  dateRange: [Date, Date];
+  dateRange: MonthRange;
   monthsPerPage: number;
   selectionSet: selectionSetProp;
 }
 
-const DatePickers: React.FC<DatePickersProps> = (props) => {
+const DatePickers = ({
+  dateRange,
+  selectionSet,
+  monthsPerPage,
+}: DatePickersProps) => {
   const [activeSelection, setActiveSelection] = useState<DateSelection>(
     new DateSelection({
-      selectionSetIndex: props.selectionSet.getFocusedId,
+      selectionSetIndex: selectionSet.getFocusedId,
     }),
   );
   const [hoverSelection, setHoverSelection] = useState<Date | null>(null);
   const [mouseOverListening, setMouseOverListening] = useState<boolean>(false);
   const [datePickerScroll, setDatePickerScroll] = useState<number>(0);
+  const [calendarData, setCalendarData] = useState<number[][]>([]); // [ num_of_month, num_of_year ]
 
   // if the activeSelection has been completed - add the selection to schedule
   useEffect(() => {
     if (activeSelection.isComplete())
-      props.selectionSet.addSelection(activeSelection);
+      selectionSet.addSelection(activeSelection);
   }, [activeSelection]);
 
-  let month = props.dateRange[0].getMonth();
-  let year = props.dateRange[0].getFullYear();
-  let months = [[month, year]];
-  while (
-    month !== props.dateRange[1].getMonth() ||
-    year !== props.dateRange[1].getFullYear()
-  ) {
-    if (month === 11) {
-      month = 0;
-      year += 1;
-    } else {
-      month += 1;
-    }
-    months.push([month, year]);
-  }
+  useEffect(() => {
+    if (dateRange.initDate && dateRange.finalDate) {
+      // generate calendar data based on the date range limits
+      let month = dateRange.initDate.getMonth();
+      let year = dateRange.initDate.getFullYear();
+      let months = [[month, year]];
+      while (
+        month !== dateRange.finalDate.getMonth() ||
+        year !== dateRange.finalDate.getFullYear()
+      ) {
+        if (month === 11) {
+          month = 0;
+          year += 1;
+        } else {
+          month += 1;
+        }
+        months.push([month, year]);
+      }
+      setCalendarData(months);
 
-  let datePickers = months.map(([month, year]) => (
-    <DatePicker
-      key={month.toString() + year.toString()}
-      month={[month, year]}
-      dateRange={props.dateRange}
-      hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
-      activeSelection={{ value: activeSelection, set: setActiveSelection }}
-      mouseOverListening={{
-        value: mouseOverListening,
-        set: setMouseOverListening,
-      }}
-      selectionSet={props.selectionSet}
-    />
-  ));
+      // update scroll
+      // setDatePickerScroll(dateRange.getNumberOfMonths());
+    } else {
+      console.warn(
+        'DatePickers:: did not generate calendars because the date range was not specified',
+      );
+    }
+  }, [dateRange]);
+
+  const filteredCalendarData = calendarData.slice(
+    datePickerScroll,
+    datePickerScroll + monthsPerPage,
+  );
+
+  // calendarData
+  //   .map(([month, year]) => (
+  //     <DatePicker
+  //       key={month.toString() + year.toString()}
+  //       month={[month, year]}
+  //       dateRange={dateRange}
+  //       hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
+  //       activeSelection={{ value: activeSelection, set: setActiveSelection }}
+  //       mouseOverListening={{
+  //         value: mouseOverListening,
+  //         set: setMouseOverListening,
+  //       }}
+  //       selectionSet={selectionSet}
+  //     />
+  //   ))
+  // .slice(datePickerScroll, datePickerScroll + monthsPerPage);
 
   const scrollForward = () => {
     setDatePickerScroll((prev) =>
-      prev + props.monthsPerPage < datePickers.length ? prev + 1 : prev,
+      prev + monthsPerPage < dateRange.getNumberOfMonths() ? prev + 1 : prev,
     );
   };
 
@@ -94,27 +121,45 @@ const DatePickers: React.FC<DatePickersProps> = (props) => {
     <div className="date-picker-list">
       <NavigationButton
         onClick={scrollBackward}
-        disabled={datePickerScroll > 0 ? false : true}>
+        disabled={datePickerScroll > 0 ? false : true}
+      >
         previous month
       </NavigationButton>
-      
+
       <DatePickersGroup>
-        {datePickers.slice(
-          datePickerScroll,
-          datePickerScroll + props.monthsPerPage,
+        {dateRange.getNumberOfMonths() > 0 ? (
+          filteredCalendarData.map(([month, year]) => (
+            <DatePicker
+              key={month.toString() + year.toString()}
+              month={[month, year]}
+              dateRange={dateRange}
+              hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
+              activeSelection={{
+                value: activeSelection,
+                set: setActiveSelection,
+              }}
+              mouseOverListening={{
+                value: mouseOverListening,
+                set: setMouseOverListening,
+              }}
+              selectionSet={selectionSet}
+            />
+          ))
+        ) : (
+          <p>Select the date range to display calendars</p>
         )}
       </DatePickersGroup>
-      
+
       <NavigationButton
         onClick={scrollForward}
         disabled={
-          datePickerScroll + props.monthsPerPage < datePickers.length
+          datePickerScroll + monthsPerPage < dateRange.getNumberOfMonths()
             ? false
             : true
-        }>
+        }
+      >
         next month
       </NavigationButton>
-      
     </div>
   );
 };

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react';
+
 import { CompleteDateSelection } from '../utils/DateSelection';
 import DateSelectionSet from '../utils/DateSelectionSet';
-import { generateDateSelections } from '../utils/functions';
 import RGBAColor from '../utils/RGBAColor';
+import { generateDateSelections } from '../utils/functions';
+import styled from 'styled-components';
 
 interface StyledDateSelectionSetProps {
   isFocused: boolean;
@@ -39,7 +40,7 @@ export interface ScheduleTileProps {
   setFocusedSelectionSet: (index: number) => void;
 }
 
-const ScheduleTile: React.FC<ScheduleTileProps> = (props) => {
+const ScheduleTile = (props: ScheduleTileProps) => {
   const [dateSelections, setDateSelections] = useState<CompleteDateSelection[]>(
     [],
   );

@@ -1,5 +1,6 @@
-import { range } from './functions';
 import Day from './Day';
+import MonthRange from './MonthRange';
+import { range } from './functions';
 
 class Calendar {
   year: number;
@@ -14,8 +15,13 @@ class Calendar {
   weekdayNames: string[];
   monthNames: string[];
 
-  constructor(monthYear: [number, number], dateRange: Date[]) {
-    const [initDate, finalDate] = dateRange;
+  constructor(monthYear: [number, number], dateRange: MonthRange) {
+    if (!dateRange.initDate) {
+      throw new Error("The init date of the Calendar range wasn't selected");
+    }
+    if (!dateRange.finalDate) {
+      throw new Error("The final date of the Calendar range wasn't selected");
+    }
     this.year = monthYear[1];
     this.month = monthYear[0];
     this.numOfDays = new Date(this.year, this.month + 1, 0).getDate();
@@ -28,21 +34,21 @@ class Calendar {
       this.previousMonthLength - this.offset + 1,
       this.previousMonthLength,
     ).map(
-      (day) =>
-        new Day(
-          new Date(this.year, (this.month - 1) % 12, day),
-          undefined,
-          false,
-          undefined,
-          false,
-        ),
+      (day) => new Day(new Date(this.year, (this.month - 1) % 12, day), false),
     );
 
     this.currentMonthDays = range(1, this.numOfDays).map((day) => {
       const date = new Date(this.year, this.month, day);
-      if (date < initDate || date > finalDate)
+
+      if (
+        dateRange.initDate &&
+        dateRange.finalDate &&
+        (date < dateRange.initDate || date > dateRange.finalDate)
+      ) {
         return new Day(date, undefined, false);
-      else return new Day(date);
+      } else {
+        return new Day(date);
+      }
     });
 
     this.days = [...this.previousMonthDays, ...this.currentMonthDays];

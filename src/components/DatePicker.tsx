@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import styled from 'styled-components';
+import { useEffect, useRef, useState } from 'react';
+
 import Calendar from '../utils/Calendar';
-import DayTile from './DayTile';
 import DateSelection from '../utils/DateSelection';
-import { selectionSetProp } from '../types/types';
 import Day from '../utils/Day';
+import DayTile, { UpdatedDayProps } from './DayTile';
+import MonthRange from '../utils/MonthRange';
+import { selectionSetProp } from '../types/types';
+import styled from 'styled-components';
 
 const StyledWeekdayLabel = styled.div`
   color: rgb(191, 191, 191);
@@ -13,7 +15,7 @@ const StyledWeekdayLabel = styled.div`
 const StyledDatePicker = styled.div`
   border: 1px solid lightgrey;
   padding: 1em;
-  border-radius: .6em;
+  border-radius: 0.6em;
 `;
 
 const StyledDateTiles = styled.div`
@@ -23,7 +25,7 @@ const StyledDateTiles = styled.div`
 
 export interface DatePickerProps {
   month: [number, number];
-  dateRange: [Date, Date];
+  dateRange: MonthRange;
   activeSelection: {
     value: DateSelection;
     set: (selection: DateSelection) => void;
@@ -39,39 +41,74 @@ export interface DatePickerProps {
   selectionSet: selectionSetProp;
 }
 
-const DatePicker: React.FC<DatePickerProps> = (props) => {
-  const [cal, setCal] = useState(new Calendar(props.month, props.dateRange));
+const DatePicker = ({
+  month,
+  dateRange,
+  hoverSelection,
+  activeSelection,
+  mouseOverListening,
+  selectionSet,
+}: DatePickerProps) => {
+  // const [cal, setCal] = useState<Calendar>();
+  const cal = useRef<Calendar>();
+  const [days, setDays] = useState<Day[]>([]);
 
-  const replaceDay = (newDay: Day, index: number): void =>
-    setCal({
-      ...cal,
-      days: [...cal.days.slice(0, index), newDay, ...cal.days.slice(index + 1)],
+  useEffect(() => {
+    if (month && dateRange.initDate && dateRange.finalDate && !cal.current)
+      try {
+        // setCal(new Calendar(month, dateRange));
+        cal.current = new Calendar(month, dateRange);
+        setDays(cal.current.days);
+      } catch (e) {
+        console.error('Generating a new calendar error: ', e);
+      }
+  }, [month, dateRange]);
+
+  // if the date range is not selected -- no calendars are shown
+  if (!dateRange.initDate || !dateRange.finalDate) {
+    return (
+      <div>
+        Select the date range for the schedule
+        <p>
+          Current range: {dateRange.initDate?.toString()} -{' '}
+          {dateRange.finalDate?.toString()}
+        </p>
+      </div>
+    );
+  }
+
+  const updateDay = (updatedDayProps: UpdatedDayProps, index: number): void => {
+    setDays((prevDays) => {
+      return [
+        ...prevDays.slice(0, index),
+        { ...prevDays[index], ...updatedDayProps },
+        ...prevDays.slice(index + 1),
+      ];
     });
+  };
 
-  const weekdayLabels = cal.weekdayNames.map((wd) => (
+  const weekdayLabels: React.ReactNode = cal.current?.weekdayNames.map((wd) => (
     <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
   ));
 
-  const dayTiles = cal.days.map((day, index) => (
-    <DayTile
-      key={day.date.toString()}
-      day={{
-        value: day,
-        set: (newDay: Day) => replaceDay(newDay, index),
-      }}
-      hoverSelection={props.hoverSelection}
-      activeSelection={props.activeSelection}
-      mouseOverListening={props.mouseOverListening}
-      selectionSet={props.selectionSet}
-    />
-  ));
-
   return (
-    <StyledDatePicker>      
-      {cal.getMonthName()} {cal.year}
+    <StyledDatePicker>
+      {cal.current?.getMonthName()} {cal.current?.year}
       <StyledDateTiles>
         {weekdayLabels}
-        {dayTiles}
+        {days.map((day, index) => (
+          <DayTile
+            key={day.date.toString()}
+            day={day}
+            updateDay={(updatedDayProps: UpdatedDayProps) => {
+              updateDay(updatedDayProps, index);
+            }}
+            hoverSelection={hoverSelection}
+            activeSelection={activeSelection}
+            mouseOverListening={mouseOverListening}
+            selectionSet={selectionSet}
+          />
+        ))}
       </StyledDateTiles>
     </StyledDatePicker>
   );
