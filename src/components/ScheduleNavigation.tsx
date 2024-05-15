@@ -1,7 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
 import DateSelectionSet from '../utils/DateSelectionSet';
+import React from 'react';
 import ScheduleTile from './ScheduleTile';
+import styled from 'styled-components';
 
 const StyledScheduleNavigation = styled.div`
   display: flex;
@@ -37,7 +37,7 @@ export interface ScheduleNavigationProps {
   setFocusedSelectionSet: (index: number) => void;
 }
 
-const ScheduleNavigation: React.FC<ScheduleNavigationProps> = (props) => {
+const ScheduleNavigation = (props: ScheduleNavigationProps) => {
   const selectionSets = props.schedule.map((selectionSet) => (
     <ScheduleTile
       key={selectionSet.id}

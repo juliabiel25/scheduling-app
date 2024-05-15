@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import styled from 'styled-components';
+import { useEffect, useState } from 'react';
+
 import Calendar from '../utils/Calendar';
-import DayTile from './DayTile';
 import DateSelection from '../utils/DateSelection';
-import { selectionSetProp } from '../types/types';
 import Day from '../utils/Day';
+import DayTile from './DayTile';
+import MonthRange from '../utils/MonthRange';
+import { selectionSetProp } from '../types/types';
+import styled from 'styled-components';
 
 const StyledWeekdayLabel = styled.div`
   color: rgb(191, 191, 191);
@@ -13,7 +15,7 @@ const StyledWeekdayLabel = styled.div`
 const StyledDatePicker = styled.div`
   border: 1px solid lightgrey;
   padding: 1em;
-  border-radius: .6em;
+  border-radius: 0.6em;
 `;
 
 const StyledDateTiles = styled.div`
@@ -23,7 +25,7 @@ const StyledDateTiles = styled.div`
 
 export interface DatePickerProps {
   month: [number, number];
-  dateRange: [Date, Date];
+  dateRange: MonthRange;
   activeSelection: {
     value: DateSelection;
     set: (selection: DateSelection) => void;
@@ -39,36 +41,72 @@ export interface DatePickerProps {
   selectionSet: selectionSetProp;
 }
 
-const DatePicker: React.FC<DatePickerProps> = (props) => {
-  const [cal, setCal] = useState(new Calendar(props.month, props.dateRange));
+const DatePicker = ({
+  month,
+  dateRange,
+  hoverSelection,
+  activeSelection,
+  mouseOverListening,
+  selectionSet,
+}: DatePickerProps) => {
+  const [cal, setCal] = useState<Calendar>();
 
-  const replaceDay = (newDay: Day, index: number): void =>
-    setCal({
-      ...cal,
-      days: [...cal.days.slice(0, index), newDay, ...cal.days.slice(index + 1)],
-    });
+  useEffect(() => {
+    if (month && dateRange.initDate && dateRange.finalDate)
+      try {
+        setCal(new Calendar(month, dateRange));
+      } catch (e) {
+        console.error('Generating a new calendar error: ', e);
+      }
+  }, [month, dateRange]);
 
-  const weekdayLabels = cal.weekdayNames.map((wd) => (
+  // if the date range is not selected -- no calendars are shown
+  if (!dateRange.initDate || !dateRange.finalDate) {
+    return (
+      <div>
+        Select the date range for the schedule
+        <p>
+          Current range: {dateRange.initDate?.toString()} -{' '}
+          {dateRange.finalDate?.toString()}
+        </p>
+      </div>
+    );
+  }
+
+  const replaceDay = (newDay: Day, index: number): void => {
+    if (cal) {
+      setCal({
+        ...cal,
+        days: [
+          ...cal.days.slice(0, index),
+          newDay,
+          ...cal.days.slice(index + 1),
+        ],
+      });
+    }
+  };
+
+  const weekdayLabels = cal?.weekdayNames.map((wd) => (
     <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
   ));
 
-  const dayTiles = cal.days.map((day, index) => (
+  const dayTiles = cal?.days.map((day, index) => (
     <DayTile
       key={day.date.toString()}
       day={{
         value: day,
         set: (newDay: Day) => replaceDay(newDay, index),
       }}
-      hoverSelection={props.hoverSelection}
-      activeSelection={props.activeSelection}
-      mouseOverListening={props.mouseOverListening}
-      selectionSet={props.selectionSet}
+      hoverSelection={hoverSelection}
+      activeSelection={activeSelection}
+      mouseOverListening={mouseOverListening}
+      selectionSet={selectionSet}
     />
   ));
 
   return (
-    <StyledDatePicker>      
-      {cal.getMonthName()} {cal.year}
+    <StyledDatePicker>
+      {cal?.getMonthName()} {cal?.year}
       <StyledDateTiles>
         {weekdayLabels}
         {dayTiles}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { selectionSetProp } from '../types/types';
+import { useEffect, useState } from 'react';
+
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
 import RGBAColor from '../utils/RGBAColor';
+import { selectionSetProp } from '../types/types';
+import styled from 'styled-components';
 
 interface StyledDayTileProps {
   tileColor: RGBAColor | undefined;
@@ -61,9 +62,13 @@ export interface DayTileProps {
   selectionSet: selectionSetProp;
 }
 
-const DayTile: React.FC<DayTileProps> = (props) => {
+const DayTile = (props: DayTileProps) => {
   let day = props.day.value;
   const setDay = props.day.set;
+
+  // useEffect(() => {
+  //   console.log('DayTile:: HOVER SELECTION: ', props.hoverSelection?.value);
+  // }, [props.hoverSelection?.value]);
 
   const [color, setColor] = useState<RGBAColor | undefined>();
   const [prevColor, setPrevColor] = useState<RGBAColor | undefined>();
@@ -88,6 +93,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
   // mark day as hovered or not on hoverSelection change
   useEffect(() => {
     if (props.hoverSelection.value && day.isEnabled) {
+      // if a selection was started and the day falls between the opening of the active selection and the hovered date (or the other way aroung)
       if (
         props.activeSelection.value.openingDate &&
         ((day.date <= props.hoverSelection.value &&
@@ -95,12 +101,18 @@ const DayTile: React.FC<DayTileProps> = (props) => {
           (day.date >= props.hoverSelection.value &&
             day.date <= props.activeSelection.value.openingDate))
       ) {
+        // if the day is not already hovered, remember the previous color of the tile
         if (!day.isHovered) {
           let newDay = day;
           newDay.isHovered = true;
           setDay(newDay);
           setColor((prevColor) => {
             setPrevColor(prevColor);
+            console.log('setting prevColor to: ', prevColor);
+            console.log(
+              'setting new color to: ',
+              props.selectionSet.getColor(),
+            );
             return props.selectionSet.getColor();
           });
         }
@@ -109,8 +121,9 @@ const DayTile: React.FC<DayTileProps> = (props) => {
         if (day.isHovered) {
           let newDay = day;
           newDay.isHovered = false;
+          setColor(undefined);
           setDay(newDay);
-          setColor(prevColor);
+          // setColor(prevColor);
         }
       }
     }
@@ -192,6 +205,7 @@ const DayTile: React.FC<DayTileProps> = (props) => {
 
   return (
     <StyledDayTile
+      className="no-select"
       tileColor={color}
       isEnabled={day.isEnabled}
       isHovered={day.isHovered}
