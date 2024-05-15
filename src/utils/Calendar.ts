@@ -34,14 +34,7 @@ class Calendar {
       this.previousMonthLength - this.offset + 1,
       this.previousMonthLength,
     ).map(
-      (day) =>
-        new Day(
-          new Date(this.year, (this.month - 1) % 12, day),
-          undefined,
-          false,
-          undefined,
-          false,
-        ),
+      (day) => new Day(new Date(this.year, (this.month - 1) % 12, day), false),
     );
 
     // console.log('date < dateRange.initDate: ', date < dateRange.initDate);

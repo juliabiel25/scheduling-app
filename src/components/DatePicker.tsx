@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Calendar from '../utils/Calendar';
 import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
-import DayTile from './DayTile';
+import DayTile, { UpdatedDayProps } from './DayTile';
 import MonthRange from '../utils/MonthRange';
 import { selectionSetProp } from '../types/types';
 import styled from 'styled-components';
@@ -49,12 +49,21 @@ const DatePicker = ({
   mouseOverListening,
   selectionSet,
 }: DatePickerProps) => {
-  const [cal, setCal] = useState<Calendar>();
+  // const [cal, setCal] = useState<Calendar>();
+  const cal = useRef<Calendar>();
+  const [days, setDays] = useState<Day[]>([]);
 
   useEffect(() => {
-    if (month && dateRange.initDate && dateRange.finalDate)
+    console.log('Days changed to: ', days);
+  }, [days]);
+
+  useEffect(() => {
+    if (month && dateRange.initDate && dateRange.finalDate && !cal.current)
       try {
-        setCal(new Calendar(month, dateRange));
+        // setCal(new Calendar(month, dateRange));
+        cal.current = new Calendar(month, dateRange);
+        console.log('setting days to cal.current.days: ', cal.current.days);
+        setDays(cal.current.days);
       } catch (e) {
         console.error('Generating a new calendar error: ', e);
       }
@@ -73,43 +82,68 @@ const DatePicker = ({
     );
   }
 
-  const replaceDay = (newDay: Day, index: number): void => {
-    if (cal) {
-      setCal({
-        ...cal,
-        days: [
-          ...cal.days.slice(0, index),
-          newDay,
-          ...cal.days.slice(index + 1),
-        ],
-      });
-    }
+  const updateDay = (updatedDayProps: UpdatedDayProps, index: number): void => {
+    // setCal((prevCal) => {
+    //   if (!prevCal) {
+    //     console.error('Tried to update a day but there is no calendar object');
+    //     return undefined;
+    //   } else
+    //     console.log(
+    //       'updating cal to: ',
+    //       { updatedDayProps },
+    //       { ...prevCal.days[index], ...updatedDayProps },
+    //     );
+    //   return {
+    //     ...prevCal,
+    //     days: [
+    //       ...prevCal.days.slice(0, index),
+    //       { ...prevCal.days[index], ...updatedDayProps },
+    //       ...prevCal.days.slice(index + 1),
+    //     ],
+    //   };
+    // });
+    console.log('updating days with: ', { updatedDayProps });
+    setDays((prevDays) => {
+      return [
+        ...prevDays.slice(0, index),
+        { ...prevDays[index], ...updatedDayProps },
+        ...prevDays.slice(index + 1),
+      ];
+    });
   };
 
-  const weekdayLabels = cal?.weekdayNames.map((wd) => (
+  const weekdayLabels: React.ReactNode = cal.current?.weekdayNames.map((wd) => (
     <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
-  ));
-
-  const dayTiles = cal?.days.map((day, index) => (
-    <DayTile
-      key={day.date.toString()}
-      day={{
-        value: day,
-        set: (newDay: Day) => replaceDay(newDay, index),
-      }}
-      hoverSelection={hoverSelection}
-      activeSelection={activeSelection}
-      mouseOverListening={mouseOverListening}
-      selectionSet={selectionSet}
-    />
   ));
 
   return (
     <StyledDatePicker>
-      {cal?.getMonthName()} {cal?.year}
+      {cal.current?.getMonthName()} {cal.current?.year}
       <StyledDateTiles>
         {weekdayLabels}
-        {dayTiles}
+        {days.map((day, index) => (
+          <DayTile
+            key={day.date.toString()}
+            // day={{
+            //   value: day,
+            //   set: (newDay: Day) => {
+            //     console.log('setting day to: ', newDay);
+            //     replaceDay(newDay, index);
+            //   },
+            // }}
+            day={day}
+            // setDay={(newDay: Day) => {
+            //   replaceDay(newDay, index);
+            // }}
+            updateDay={(updatedDayProps: UpdatedDayProps) => {
+              updateDay(updatedDayProps, index);
+            }}
+            hoverSelection={hoverSelection}
+            activeSelection={activeSelection}
+            mouseOverListening={mouseOverListening}
+            selectionSet={selectionSet}
+          />
+        ))}
       </StyledDateTiles>
     </StyledDatePicker>
   );
