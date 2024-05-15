@@ -50,6 +50,10 @@ const DatePickers = ({
   const [datePickerScroll, setDatePickerScroll] = useState<number>(0);
   const [calendarData, setCalendarData] = useState<number[][]>([]); // [ num_of_month, num_of_year ]
 
+  useEffect(() => {
+    console.log({ datePickerScroll });
+  }, [datePickerScroll]);
+
   // if the activeSelection has been completed - add the selection to schedule
   useEffect(() => {
     if (activeSelection.isComplete())
@@ -75,9 +79,6 @@ const DatePickers = ({
         months.push([month, year]);
       }
       setCalendarData(months);
-
-      // update scroll
-      // setDatePickerScroll(dateRange.getNumberOfMonths());
     } else {
       console.warn(
         'DatePickers:: did not generate calendars because the date range was not specified',
@@ -89,23 +90,6 @@ const DatePickers = ({
     datePickerScroll,
     datePickerScroll + monthsPerPage,
   );
-
-  // calendarData
-  //   .map(([month, year]) => (
-  //     <DatePicker
-  //       key={month.toString() + year.toString()}
-  //       month={[month, year]}
-  //       dateRange={dateRange}
-  //       hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
-  //       activeSelection={{ value: activeSelection, set: setActiveSelection }}
-  //       mouseOverListening={{
-  //         value: mouseOverListening,
-  //         set: setMouseOverListening,
-  //       }}
-  //       selectionSet={selectionSet}
-  //     />
-  //   ))
-  // .slice(datePickerScroll, datePickerScroll + monthsPerPage);
 
   const scrollForward = () => {
     setDatePickerScroll((prev) =>
