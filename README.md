@@ -1,7 +1,10 @@
 # scheduling-app
-A work-in-progress app for scheduling meeting dates with your very busy friends. 
+A work-in-progress app/component for complex date-time input. 
 
-The current version includes only a custom date selection component, which allows to create complex date selection sets and (ultimately) assign different time slots to them. 
+Up-to-date demo available at https://juliab-scheduling-app.vercel.app/
+
+Currently allows to:
+- create groups of multiple separate date ranges
 
 Created using styled components ✨
 
