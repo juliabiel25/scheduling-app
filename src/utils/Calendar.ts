@@ -45,7 +45,7 @@ class Calendar {
         dateRange.finalDate &&
         (date < dateRange.initDate || date > dateRange.finalDate)
       ) {
-        return new Day(date, undefined, false);
+        return new Day(date, false, false);
       } else {
         return new Day(date);
       }
