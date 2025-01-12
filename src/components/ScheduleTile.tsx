@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDatePickerState } from '../state/StateContext';
 
 import { CompleteDateSelection } from '../utils/DateSelection';
 import DateSelectionSet from '../utils/DateSelectionSet';
@@ -35,24 +36,28 @@ const StyledDateSelectionSet = styled.div<StyledDateSelectionSetProps>`
 
 export interface ScheduleTileProps {
   selectionSet: DateSelectionSet;
-  focusedSelectionSet: number;
-  getSelectionSetIndex: (id: number) => number;
-  setFocusedSelectionSet: (index: number) => void;
 }
 
 const ScheduleTile = (props: ScheduleTileProps) => {
   const [dateSelections, setDateSelections] = useState<CompleteDateSelection[]>(
     [],
   );
+
+  const { state, dispatch } = useDatePickerState();
+
   const selectionSetClicked = (): void => {
-    props.setFocusedSelectionSet(props.selectionSet.id);
+    dispatch({
+      type: 'SET_FOCUSED_SELECTION_SET',
+      payload: props.selectionSet.id,
+    });
   };
 
   useEffect(() => {
     setDateSelections(
       generateDateSelections(
         props.selectionSet.dates,
-        props.getSelectionSetIndex(props.selectionSet.id),
+
+        state.getSelectionSetIndex(props.selectionSet.id),
       ),
     );
   }, [props.selectionSet]);
@@ -73,7 +78,7 @@ const ScheduleTile = (props: ScheduleTileProps) => {
   return (
     <StyledDateSelectionSet
       onClick={selectionSetClicked}
-      isFocused={props.focusedSelectionSet === props.selectionSet.id}
+      isFocused={state.focusedSelectionSet === props.selectionSet.id}
       selectionColor={props.selectionSet.color}
     >
       {dateSelectionJSX}

@@ -1,5 +1,4 @@
-import DateSelectionSet from '../utils/DateSelectionSet';
-import React from 'react';
+import { useDatePickerState } from '../state/StateContext';
 import ScheduleTile from './ScheduleTile';
 import styled from 'styled-components';
 
@@ -30,22 +29,15 @@ const StyledAddSelectionBtn = styled.button`
 `;
 
 export interface ScheduleNavigationProps {
-  schedule: DateSelectionSet[];
   newSelectionSet: () => number;
-  getSelectionSetIndex: (id: number) => number;
-  focusedSelectionSet: number;
-  setFocusedSelectionSet: (index: number) => void;
 }
 
 const ScheduleNavigation = (props: ScheduleNavigationProps) => {
-  const selectionSets = props.schedule.map((selectionSet) => (
-    <ScheduleTile
-      key={selectionSet.id}
-      selectionSet={selectionSet}
-      getSelectionSetIndex={props.getSelectionSetIndex}
-      focusedSelectionSet={props.focusedSelectionSet}
-      setFocusedSelectionSet={props.setFocusedSelectionSet}
-    />
+  const {
+    state: { schedule },
+  } = useDatePickerState();
+  const selectionSets = schedule.map((selectionSet) => (
+    <ScheduleTile key={selectionSet.id} selectionSet={selectionSet} />
   ));
 
   return (

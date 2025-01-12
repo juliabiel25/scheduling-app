@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import Calendar from '../utils/Calendar';
-import DateSelection from '../utils/DateSelection';
 import Day from '../utils/Day';
 import DayTile, { UpdatedDayProps } from './DayTile';
 import MonthRange from '../utils/MonthRange';
-import { selectionSetProp } from '../types/types';
 import styled from 'styled-components';
+import { useDatePickerState } from '../state/StateContext';
 
 const StyledWeekdayLabel = styled.div`
   color: rgb(191, 191, 191);
@@ -26,32 +25,12 @@ const StyledDateTiles = styled.div`
 export interface DatePickerProps {
   month: [number, number];
   dateRange: MonthRange;
-  activeSelection: {
-    value: DateSelection;
-    set: (selection: DateSelection) => void;
-  };
-  hoverSelection: {
-    value: Date | null;
-    set: (selection: Date | null) => void;
-  };
-  mouseOverListening: {
-    value: boolean;
-    set: (listen: boolean) => void;
-  };
-  selectionSet: selectionSetProp;
 }
 
-const DatePicker = ({
-  month,
-  dateRange,
-  hoverSelection,
-  activeSelection,
-  mouseOverListening,
-  selectionSet,
-}: DatePickerProps) => {
-  // const [cal, setCal] = useState<Calendar>();
+const DatePicker = ({ month, dateRange }: DatePickerProps) => {
   const cal = useRef<Calendar>();
   const [days, setDays] = useState<Day[]>([]);
+  const { dispatch } = useDatePickerState();
 
   useEffect(() => {
     if (month && dateRange.initDate && dateRange.finalDate && !cal.current)
@@ -77,16 +56,6 @@ const DatePicker = ({
     );
   }
 
-  const updateDay = (updatedDayProps: UpdatedDayProps, index: number): void => {
-    setDays((prevDays) => {
-      return [
-        ...prevDays.slice(0, index),
-        { ...prevDays[index], ...updatedDayProps },
-        ...prevDays.slice(index + 1),
-      ];
-    });
-  };
-
   const weekdayLabels: React.ReactNode = cal.current?.weekdayNames.map((wd) => (
     <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
   ));
@@ -101,12 +70,11 @@ const DatePicker = ({
             key={day.date.toString()}
             day={day}
             updateDay={(updatedDayProps: UpdatedDayProps) => {
-              updateDay(updatedDayProps, index);
+              dispatch({
+                type: 'UPDATE_DAY',
+                payload: { day: day.copy(updatedDayProps), index },
+              });
             }}
-            hoverSelection={hoverSelection}
-            activeSelection={activeSelection}
-            mouseOverListening={mouseOverListening}
-            selectionSet={selectionSet}
           />
         ))}
       </StyledDateTiles>

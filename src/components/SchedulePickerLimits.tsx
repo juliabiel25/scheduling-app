@@ -1,11 +1,7 @@
-import MonthRange from '../utils/MonthRange';
 import styled from 'styled-components';
+import { useDatePickerState } from '../state/StateContext';
 
-export interface SchedulePickerLimitsProps {
-  dateRange: MonthRange;
-  onInitDateChange: (date: Date | null) => void;
-  onFinalDateChange: (date: Date | null) => void;
-}
+export interface SchedulePickerLimitsProps {}
 
 const StyledDateInput = styled.input`
   padding: 0.7em 1.2em;
@@ -18,20 +14,30 @@ const StyledInputContainer = styled.div`
   gap: 0.5em;
 `;
 
-const SchedulePickerLimits = ({
-  dateRange,
-  onInitDateChange,
-  onFinalDateChange,
-}: SchedulePickerLimitsProps) => {
+const SchedulePickerLimits = ({}: SchedulePickerLimitsProps) => {
+  const { state, dispatch } = useDatePickerState();
+
   return (
     <StyledInputContainer className="dateRangeLimiter">
       <StyledDateInput
         type="date"
-        onChange={(e) => onInitDateChange(e.target.valueAsDate)}
+        value={state.dateRange.initDate?.toISOString().split('T')[0] || ''}
+        onChange={(e) =>
+          dispatch({
+            type: 'SET_DATE_RANGE_START',
+            payload: e.target.valueAsDate,
+          })
+        }
       />
       <StyledDateInput
         type="date"
-        onChange={(e) => onFinalDateChange(e.target.valueAsDate)}
+        value={state.dateRange.finalDate?.toISOString().split('T')[0] || ''}
+        onChange={(e) =>
+          dispatch({
+            type: 'SET_DATE_RANGE_END',
+            payload: e.target.valueAsDate,
+          })
+        }
       />
     </StyledInputContainer>
   );

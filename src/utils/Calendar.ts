@@ -70,6 +70,18 @@ class Calendar {
     ];
   }
 
+  copy({
+    dateRange,
+    overwriteDays,
+  }: {
+    dateRange: MonthRange;
+    overwriteDays?: Day[];
+  }): Calendar {
+    const newCalendar = new Calendar([this.month, this.year], dateRange);
+    if (overwriteDays) newCalendar.days = overwriteDays;
+    return newCalendar;
+  }
+
   getMonthName = () => this.monthNames[this.month];
 
   includesDate = (date: Date): boolean => {

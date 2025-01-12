@@ -29,4 +29,33 @@ export default class Day {
     this.color = color;
     this.hoverColor = hoverColor;
   }
+
+  copy({
+    isEnabled,
+    isSelected,
+    isHovered,
+    isCurrentMonth,
+    selectionSetIndex,
+    color,
+    hoverColor,
+  }: {
+    isEnabled?: boolean;
+    isSelected?: boolean;
+    isHovered?: boolean;
+    isCurrentMonth?: boolean;
+    selectionSetIndex?: number | null;
+    color?: RGBAColor | null;
+    hoverColor?: RGBAColor | null;
+  }): Day {
+    return new Day(
+      this.date,
+      isEnabled || this.isEnabled,
+      isSelected || this.isSelected,
+      isHovered || this.isHovered,
+      isCurrentMonth || this.isCurrentMonth,
+      selectionSetIndex || this.selectionSetIndex,
+      color || this.color,
+      hoverColor || this.hoverColor,
+    );
+  }
 }

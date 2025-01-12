@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import DatePicker from './DatePicker';
-import DateSelection from '../utils/DateSelection';
-import MonthRange from '../utils/MonthRange';
-import { selectionSetProp } from '../types/types';
 import styled from 'styled-components';
+import { useDatePickerState } from '../state/StateContext';
 
 const NavigationButton = styled.button<{}>`
   border: none;
@@ -30,35 +28,14 @@ const DatePickersGroup = styled.div<{}>`
 `;
 
 export interface DatePickersProps {
-  dateRange: MonthRange;
   monthsPerPage: number;
-  selectionSet: selectionSetProp;
 }
 
-const DatePickers = ({
-  dateRange,
-  selectionSet,
-  monthsPerPage,
-}: DatePickersProps) => {
-  const [activeSelection, setActiveSelection] = useState<DateSelection>(
-    new DateSelection({
-      selectionSetIndex: selectionSet.getFocusedId,
-    }),
-  );
-  const [hoverSelection, setHoverSelection] = useState<Date | null>(null);
-  const [mouseOverListening, setMouseOverListening] = useState<boolean>(false);
-  const [datePickerScroll, setDatePickerScroll] = useState<number>(0);
-  const [calendarData, setCalendarData] = useState<number[][]>([]); // [ num_of_month, num_of_year ]
-
-  useEffect(() => {
-    console.log({ datePickerScroll });
-  }, [datePickerScroll]);
-
-  // if the activeSelection has been completed - add the selection to schedule
-  useEffect(() => {
-    if (activeSelection.isComplete())
-      selectionSet.addSelection(activeSelection);
-  }, [activeSelection]);
+const DatePickers = ({ monthsPerPage }: DatePickersProps) => {
+  const {
+    state: { dateRange, activeSelection, calendarData, datePickerScroll },
+    dispatch,
+  } = useDatePickerState();
 
   useEffect(() => {
     if (dateRange.initDate && dateRange.finalDate) {
@@ -78,7 +55,7 @@ const DatePickers = ({
         }
         months.push([month, year]);
       }
-      setCalendarData(months);
+      dispatch({ type: 'SET_CALENDAR_DATA', payload: months });
     } else {
       console.warn(
         'DatePickers:: did not generate calendars because the date range was not specified',
@@ -92,13 +69,20 @@ const DatePickers = ({
   );
 
   const scrollForward = () => {
-    setDatePickerScroll((prev) =>
-      prev + monthsPerPage < dateRange.getNumberOfMonths() ? prev + 1 : prev,
-    );
+    dispatch({
+      type: 'SET_DATE_PICKER_SCROLL',
+      payload:
+        datePickerScroll + monthsPerPage < dateRange.getNumberOfMonths()
+          ? datePickerScroll + 1
+          : datePickerScroll,
+    });
   };
 
   const scrollBackward = () => {
-    setDatePickerScroll((prev) => (prev > 0 ? prev - 1 : prev));
+    dispatch({
+      type: 'SET_DATE_PICKER_SCROLL',
+      payload: datePickerScroll > 0 ? datePickerScroll - 1 : datePickerScroll,
+    });
   };
 
   return (
@@ -117,16 +101,6 @@ const DatePickers = ({
               key={month.toString() + year.toString()}
               month={[month, year]}
               dateRange={dateRange}
-              hoverSelection={{ value: hoverSelection, set: setHoverSelection }}
-              activeSelection={{
-                value: activeSelection,
-                set: setActiveSelection,
-              }}
-              mouseOverListening={{
-                value: mouseOverListening,
-                set: setMouseOverListening,
-              }}
-              selectionSet={selectionSet}
             />
           ))
         ) : (
