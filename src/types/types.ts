@@ -7,3 +7,15 @@ export type selectionSetProp = {
   addSelection: (selection: DateSelection) => void;
   removeDate: (setIndex: number, date: Date) => void;
 };
+
+export class MonthIndex {
+  month: number;
+  year: number;
+  constructor(month: number, year: number) {
+    this.month = month;
+    this.year = year;
+  }
+  getString() {
+    return `${this.month}-${this.year}`;
+  }
+}

@@ -25,6 +25,6 @@ export default class RGBAColor {
   }
 
   opacity(alpha: number): RGBAColor {
-    return new RGBAColor({...this, alpha: alpha});
+    return new RGBAColor({ ...this, alpha: alpha });
   }
 }

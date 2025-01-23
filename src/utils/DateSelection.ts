@@ -75,6 +75,34 @@ class DateSelection {
       )} - ${this.closingDate?.toLocaleDateString('en-US')}`;
     return `${this.openingDate?.toLocaleDateString('en-US')} - ...`;
   }
+
+  pushEdgeDate(date: Date): DateSelection {
+    // selection is blank and the date
+    if (!this.openingDate) this.openingDate = date;
+
+    // selection is incomplete and the date is the new opening date
+    if (!this.closingDate && date < this.openingDate) {
+      this.closingDate = this.openingDate;
+      this.openingDate = date;
+    }
+
+    // selection is incomplete and the date is the new closing date
+    if (!this.closingDate && date > this.openingDate) {
+      this.closingDate = date;
+    }
+
+    // selection is complete but the date precedes the opening date
+    if (this.closingDate && date < this.openingDate) {
+      this.openingDate = date;
+    }
+
+    // selection is complete but the date proceeds the ending date
+    if (this.closingDate && date > this.closingDate) {
+      this.closingDate = date;
+    }
+
+    return this;
+  }
 }
 
 interface CompleteDateSelectionIn {

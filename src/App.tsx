@@ -17,7 +17,7 @@ const App = () => {
       <DatePickerStateProvider>
         <div className="col center">
           <SchedulePickerLimits />
-          <SchedulePicker monthsPerPage={2} />
+          <SchedulePicker />
         </div>
       </DatePickerStateProvider>
     </StyledApp>

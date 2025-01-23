@@ -49,13 +49,17 @@ export default class Day {
   }): Day {
     return new Day(
       this.date,
-      isEnabled || this.isEnabled,
-      isSelected || this.isSelected,
-      isHovered || this.isHovered,
-      isCurrentMonth || this.isCurrentMonth,
-      selectionSetIndex || this.selectionSetIndex,
-      color || this.color,
-      hoverColor || this.hoverColor,
+      isEnabled ?? this.isEnabled,
+      isSelected ?? this.isSelected,
+      isHovered ?? this.isHovered,
+      isCurrentMonth ?? this.isCurrentMonth,
+
+      // values that can be set to null:
+      selectionSetIndex === undefined
+        ? this.selectionSetIndex
+        : selectionSetIndex,
+      color === undefined ? this.color : color,
+      hoverColor === undefined ? this.hoverColor : hoverColor,
     );
   }
 }

@@ -8,7 +8,7 @@ import {
 import {
   DatePickerState,
   initialDatePickerState,
-  stateReducer,
+  stateReducerWrapper,
 } from './StateReducer';
 
 interface DatePickerContextValue {
@@ -30,7 +30,10 @@ export const useDatePickerState = () => {
 };
 
 export function DatePickerStateProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(stateReducer, initialDatePickerState);
+  const [state, dispatch] = useReducer(
+    stateReducerWrapper,
+    initialDatePickerState,
+  );
   return (
     <DatePickerStateContext.Provider value={{ state, dispatch }}>
       {children}

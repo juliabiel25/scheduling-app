@@ -4,57 +4,93 @@ import DateSelection from '../utils/DateSelection';
 import MonthRange from '../utils/MonthRange';
 import RGBAColor from '../utils/RGBAColor';
 import { generateDatesInRange, replaceValueAtIndex } from '../utils/functions';
+import { MonthIndex } from '../types/types';
+import { Action } from './actions';
+import { UpdatedDayProps } from '../components/DayTile';
+import Day from '../utils/Day';
+
+export type Calendars = { [key: string]: Calendar };
 
 export class DatePickerState {
   dateRange = new MonthRange(null, null);
-  calendar: Calendar | null = null;
+  calendars: Calendars = {};
   schedule = [new DateSelectionSet({ id: 1 })];
-  focusedSelectionSet = 1;
-  activeSelection = new DateSelection({
-    selectionSetIndex: this.focusedSelectionSet,
+  focusedSelectionSetId = 1;
+  hoverSelection = new DateSelection({
+    selectionSetIndex: this.focusedSelectionSetId,
   });
-  hoverSelection: Date | null = null;
+  currentlyHoveredDate: Date | null = null;
   mouseOverListening = false;
   datePickerScroll = 0;
-  calendarData: [number, number][] = []; // [month, year]
-
-  selectionSetId: number | null = null;
-  previousSelectionSetId: number | null = null;
+  calendarMonths: MonthIndex[] = []; // [month, year]
+  monthsPerPage = 1;
 
   constructor(state: Partial<DatePickerState> = {}) {
     // if some state properties are provided, overwrite the default values
     this.dateRange = state?.dateRange || this.dateRange;
-    this.calendar = state?.calendar || this.calendar;
+    this.calendars = state?.calendars || this.calendars;
     this.schedule = state?.schedule || this.schedule;
-    this.focusedSelectionSet =
-      state?.focusedSelectionSet || this.focusedSelectionSet;
-    this.activeSelection = state?.activeSelection || this.activeSelection;
+    this.focusedSelectionSetId =
+      state?.focusedSelectionSetId || this.focusedSelectionSetId;
     this.hoverSelection = state?.hoverSelection || this.hoverSelection;
+    this.currentlyHoveredDate =
+      state?.currentlyHoveredDate || this.currentlyHoveredDate;
     this.mouseOverListening =
       state?.mouseOverListening || this.mouseOverListening;
     this.datePickerScroll = state?.datePickerScroll || this.datePickerScroll;
-    this.calendarData = state?.calendarData || this.calendarData;
+    this.calendarMonths = state?.calendarMonths || this.calendarMonths;
+    this.monthsPerPage = state?.monthsPerPage || this.monthsPerPage;
   }
-
-  getSelectionSetIndex = (id: number): number => {
-    return this.schedule.findIndex((selectionSet) => selectionSet.id === id);
-  };
 
   /**
    * Returns the assigned color of the date selection set specified by given index.
-   * By default index is set to focusedSelectionSet.
+   * By default index is set to focusedSelectionSetId.
    * @param {number | undefined} id - the index of a date selection set within schedule.dates[].
    * @returns {RGBAColor | undefined} - the color of the date selection set.
    */
   getSelectionSetColor = (
-    id: number = this.focusedSelectionSet,
+    id: number = this.focusedSelectionSetId,
   ): RGBAColor | undefined => {
-    const index = this.getSelectionSetIndex(id);
-    if (typeof this.schedule[index] !== 'undefined') {
-      return this.schedule[index].color;
-    }
+    return this.schedule[id].color;
   };
 
+  /**
+   * Returns a new calendars map with changes applied to specified day
+   * @param {Date} date - the date of the to-be-updated day
+   * @param {UpdatedDayProps} updatedDayProps - the updated properties of the day
+   * @returns {Map<MonthIndex, Calendar>} - the updated calendars map
+   */
+  getCalendarsWithUpdatedDay(
+    date: Date,
+    updatedDayProps: UpdatedDayProps,
+  ): Calendars {
+    // create a copy of the calendars map
+    const updatedCalendars = { ...this.calendars };
+    const monthIndex = new MonthIndex(date.getMonth(), date.getFullYear());
+    const calendar = updatedCalendars[monthIndex.getString()];
+
+    if (calendar) {
+      const dayIndex = calendar.days.findIndex(
+        (day) => day.date.getTime() === date.getTime(),
+      );
+      // const updatedDay = { ...calendar.days[dayIndex], ...updatedDayProps };
+      const updatedDay = calendar.days[dayIndex].copy(updatedDayProps);
+      const updatedDays = replaceValueAtIndex<Day>(
+        calendar.days,
+        dayIndex,
+        updatedDay,
+      );
+
+      const updatedCalendar = calendar.copy({
+        dateRange: this.dateRange,
+        overwriteDays: updatedDays,
+      });
+
+      updatedCalendars[monthIndex.getString()] = updatedCalendar;
+    }
+
+    return updatedCalendars;
+  }
   /**
    * Adds the given dateSelection to the currently focused selection set
    * @param {DateSelection} dateSelection
@@ -100,12 +136,23 @@ export class DatePickerState {
 
 export const initialDatePickerState = new DatePickerState();
 
+export function stateReducerWrapper(
+  state: DatePickerState,
+  action: Action,
+): DatePickerState {
+  const reducerResult = stateReducer(state, action);
+  console.log(`[[ ${action.type} ]]`, {
+    payload: action.payload,
+    oldState: state,
+    newState: reducerResult,
+  });
+  return reducerResult;
+}
+
 export function stateReducer(
   state: DatePickerState,
-  action?: any,
+  action: Action,
 ): DatePickerState {
-  console.log(`[[ ${action.type} ]]`, action.payload);
-
   switch (action.type) {
     case 'SET_DATE_RANGE_START': {
       // if existing final date is before the new start date, reset the final date
@@ -141,10 +188,50 @@ export function stateReducer(
         dateRange: new MonthRange(state.dateRange.initDate, action.payload),
       });
     }
+    case 'GENERATE_CALENDARS': {
+      const months: MonthIndex[] = [];
+      if (state.dateRange.initDate && state.dateRange.finalDate) {
+        // generate calendar data based on the date range limits
+        let month = state.dateRange.initDate.getMonth();
+        let year = state.dateRange.initDate.getFullYear();
+
+        // always include the first month by default
+        months.push(new MonthIndex(month, year));
+
+        while (
+          month !== state.dateRange.finalDate.getMonth() ||
+          year !== state.dateRange.finalDate.getFullYear()
+        ) {
+          if (month === 11) {
+            month = 0;
+            year += 1;
+          } else {
+            month += 1;
+          }
+          months.push(new MonthIndex(month, year));
+        }
+      } else {
+        throw new Error(
+          'Cannot generate calendars before specifying the date range limits',
+        );
+      }
+
+      // build the calendars map: monthIndex --> Calendar
+      const calendars: Calendars = {};
+      months.forEach((monthIndex) => {
+        calendars[monthIndex.getString()] = new Calendar(
+          monthIndex,
+          state.dateRange,
+        );
+      });
+      return new DatePickerState({
+        ...state,
+        calendarMonths: months,
+        calendars,
+      });
+    }
     case 'SET_CALENDAR':
-      return new DatePickerState({ ...state, calendar: action.payload });
-    case 'SET_CALENDAR_DATA':
-      return new DatePickerState({ ...state, calendarData: action.payload });
+      return new DatePickerState({ ...state, calendars: action.payload });
     case 'SET_DATE_PICKER_SCROLL':
       return new DatePickerState({
         ...state,
@@ -154,41 +241,23 @@ export function stateReducer(
       const newActiveSelection = action.payload;
       let updatedSchedule = state.schedule;
 
-      // is the new avtive selection is complete - add it to the currently in-focus selection set
-      if (newActiveSelection.isComplete()) {
-        const { focusedSelectionSet } = state;
-        const dates = generateDatesInRange(
-          newActiveSelection.openingDate,
-          newActiveSelection.closingDate,
-        );
-
-        const index = state.getSelectionSetIndex(focusedSelectionSet);
-        updatedSchedule = replaceValueAtIndex(
-          state.schedule,
-          index,
-          new DateSelectionSet({
-            id: state.schedule[index].id,
-            dates: [...state.schedule[index].dates, ...dates],
-            color: state.schedule[index].color,
-          }),
-        );
-      }
-
+    case 'SET_CURRENTLY_HOVERED_DATE': {
       return new DatePickerState({
         ...state,
-        activeSelection: action.payload,
-        schedule: updatedSchedule,
+        currentlyHoveredDate: action.payload,
       });
     }
-    case 'SET_HOVER_SELECTION':
+
+    case 'SET_HOVER_SELECTION': {
       return new DatePickerState({
         ...state,
-        hoverSelection: action.payload,
+        hoverSelection: state.hoverSelection.pushEdgeDate(action.payload),
       });
-    case 'CLEAR_HOVER_SELECTION':
+    }
+    case 'CLEAR_CURRENTLY_HOVERED_DATE':
       return new DatePickerState({
         ...state,
-        hoverSelection: null,
+        currentlyHoveredDate: null,
       });
     case 'SET_MOUSE_OVER_LISTENING':
       return new DatePickerState({
@@ -260,11 +329,46 @@ export function stateReducer(
       });
     }
 
-    case 'UPDATE_SELECTION_SET_SEQUENCE': {
+    case 'MARK_DAY_AS_HOVERED': {
       return new DatePickerState({
         ...state,
-        previousSelectionSetId: state.selectionSetId,
-        selectionSetId: state.focusedSelectionSet,
+        calendars: state.getCalendarsWithUpdatedDay(action.payload.date, {
+          isHovered: true,
+          hoverColor: state.getSelectionSetColor() ?? null,
+        }),
+      });
+    }
+    case 'MARK_DAY_AS_NOT_HOVERED': {
+      return new DatePickerState({
+        ...state,
+        calendars: state.getCalendarsWithUpdatedDay(action.payload, {
+          isHovered: false,
+          hoverColor: null,
+        }),
+      });
+    }
+    case 'MARK_DAY_AS_SELECTED': {
+      return new DatePickerState({
+        ...state,
+        calendars: state.getCalendarsWithUpdatedDay(action.payload.date, {
+          isSelected: true,
+          isHovered: false,
+          hoverColor: null,
+          color: state.getSelectionSetColor() ?? null,
+          selectionSetIndex: state.focusedSelectionSetId,
+        }),
+      });
+    }
+    case 'CLEAR_DAY_SELECTION_MARKERS': {
+      return new DatePickerState({
+        ...state,
+        calendars: state.getCalendarsWithUpdatedDay(action.payload.date, {
+          isSelected: false,
+          isHovered: false,
+          hoverColor: null,
+          color: null,
+          selectionSetIndex: null,
+        }),
       });
     }
 
