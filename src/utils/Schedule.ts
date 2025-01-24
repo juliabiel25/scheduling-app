@@ -1,12 +1,21 @@
 import DateSelectionSet from './DateSelectionSet';
-import MonthRange from './MonthRange';
+
+type ScheduleProps = {
+  selectionSetsStore?: DateSelectionSet[];
+};
 
 export default class Schedule {
-  selections: DateSelectionSet[] = [new DateSelectionSet({ id: 1 })];
-  dateRange: MonthRange | null = null;
-  constructor() {}
+  selectionSetsStore: DateSelectionSet[];
 
-  getSelectionSetIndex(id: number): number {
-    return this.selections.findIndex((selectionSet) => selectionSet.id === id);
+  constructor({ selectionSetsStore = [] }: ScheduleProps = {}) {
+    this.selectionSetsStore = selectionSetsStore;
+  }
+
+  sortSelectionSetsByOpeningDate() {}
+
+  createNewSelectionSet() {
+    return new Schedule({
+      selectionSetsStore: [...this.selectionSetsStore, new DateSelectionSet()],
+    });
   }
 }

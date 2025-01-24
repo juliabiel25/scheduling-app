@@ -1,20 +1,22 @@
+import { randomUUID } from 'crypto';
+
 class DateSelection {
   openingDate?: Date;
   closingDate?: Date;
-  selectionSetIndex?: number;
+  selectionSetId?: string;
 
   constructor({
     openingDate,
     closingDate,
-    selectionSetIndex,
+    selectionSetId,
   }: {
     openingDate?: Date;
     closingDate?: Date;
-    selectionSetIndex?: number;
-  }) {
+    selectionSetId?: string;
+  } = {}) {
     this.openingDate = openingDate;
     this.closingDate = closingDate;
-    this.selectionSetIndex = selectionSetIndex;
+    this.selectionSetId = selectionSetId;
   }
 
   startsInMonth([month, year]: [number, number]): boolean {
@@ -108,7 +110,7 @@ class DateSelection {
 interface CompleteDateSelectionIn {
   openingDate: Date;
   closingDate: Date;
-  selectionSetIndex?: number;
+  selectionSetId?: string;
 }
 
 export class CompleteDateSelection extends DateSelection {
@@ -118,12 +120,16 @@ export class CompleteDateSelection extends DateSelection {
   constructor({
     openingDate,
     closingDate,
-    selectionSetIndex,
+    selectionSetId,
   }: CompleteDateSelectionIn) {
-    super({});
+    super({ openingDate, closingDate, selectionSetId });
     this.openingDate = openingDate;
     this.closingDate = closingDate;
-    this.selectionSetIndex = selectionSetIndex;
+    this.selectionSetId = selectionSetId;
+  }
+
+  isDateInSelection(date: Date) {
+    return date >= this.openingDate && date <= this.closingDate;
   }
 }
 

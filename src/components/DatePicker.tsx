@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-
 import Calendar from '../utils/Calendar';
-import Day from '../utils/Day';
 import DayTile, { UpdatedDayProps } from './DayTile';
-import MonthRange from '../utils/MonthRange';
 import styled from 'styled-components';
 import { useDatePickerState } from '../state/StateContext';
+import { updateDay } from '../state/actions';
 
 const StyledWeekdayLabel = styled.div`
   color: rgb(191, 191, 191);
@@ -23,25 +20,14 @@ const StyledDateTiles = styled.div`
 `;
 
 export interface DatePickerProps {
-  month: [number, number];
-  dateRange: MonthRange;
+  calendar: Calendar;
 }
 
-const DatePicker = ({ month, dateRange }: DatePickerProps) => {
-  const cal = useRef<Calendar>();
-  const [days, setDays] = useState<Day[]>([]);
-  const { dispatch } = useDatePickerState();
-
-  useEffect(() => {
-    if (month && dateRange.initDate && dateRange.finalDate && !cal.current)
-      try {
-        // setCal(new Calendar(month, dateRange));
-        cal.current = new Calendar(month, dateRange);
-        setDays(cal.current.days);
-      } catch (e) {
-        console.error('Generating a new calendar error: ', e);
-      }
-  }, [month, dateRange]);
+const DatePicker = ({ calendar }: DatePickerProps) => {
+  const {
+    state: { dateRange },
+    dispatch,
+  } = useDatePickerState();
 
   // if the date range is not selected -- no calendars are shown
   if (!dateRange.initDate || !dateRange.finalDate) {
@@ -56,27 +42,18 @@ const DatePicker = ({ month, dateRange }: DatePickerProps) => {
     );
   }
 
-  const weekdayLabels: React.ReactNode = cal.current?.weekdayNames.map((wd) => (
+  const weekdayLabels: React.ReactNode = calendar.weekdayNames.map((wd) => (
     <StyledWeekdayLabel key={wd}>{wd}</StyledWeekdayLabel>
   ));
 
   return (
     <StyledDatePicker>
-      {cal.current?.getMonthName()} {cal.current?.year}
+      {calendar.getMonthName()} {calendar.year}
       <StyledDateTiles>
         {weekdayLabels}
-        {days.map((day, index) => (
-          <DayTile
-            key={day.date.toString()}
-            day={day}
-            updateDay={(updatedDayProps: UpdatedDayProps) => {
-              dispatch({
-                type: 'UPDATE_DAY',
-                payload: { day: day.copy(updatedDayProps), index },
-              });
-            }}
-          />
-        ))}
+        {calendar.days.map((day) => {
+          return <DayTile key={day.date.toString()} day={day} />;
+        })}
       </StyledDateTiles>
     </StyledDatePicker>
   );

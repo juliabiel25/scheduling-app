@@ -8,17 +8,17 @@ import { MonthIndex } from '../types/types';
 import { Action } from './actions';
 import { UpdatedDayProps } from '../components/DayTile';
 import Day from '../utils/Day';
+import Schedule from '../utils/Schedule';
 
 export type Calendars = { [key: string]: Calendar };
 
 export class DatePickerState {
   dateRange = new MonthRange(null, null);
   calendars: Calendars = {};
-  schedule = [new DateSelectionSet({ id: 1 })];
-  focusedSelectionSetId = 1;
-  hoverSelection = new DateSelection({
-    selectionSetIndex: this.focusedSelectionSetId,
-  });
+  schedule: Schedule = new Schedule();
+  // TODO assign the first created selection set as the focused one here:
+  focusedSelectionSetId = this.schedule.selectionSetsStore[0].id;
+  hoverSelection = new DateSelection();
   currentlyHoveredDate: Date | null = null;
   mouseOverListening = false;
   datePickerScroll = 0;
@@ -49,9 +49,11 @@ export class DatePickerState {
    * @returns {RGBAColor | undefined} - the color of the date selection set.
    */
   getSelectionSetColor = (
-    id: number = this.focusedSelectionSetId,
+    id: string = this.focusedSelectionSetId,
   ): RGBAColor | undefined => {
-    return this.schedule[id].color;
+    return this.schedule.selectionSetsStore.find(
+      (selectionSet) => selectionSet.id === id,
+    )?.color;
   };
 
   /**
@@ -91,46 +93,44 @@ export class DatePickerState {
 
     return updatedCalendars;
   }
+
+  // TODO nie wiem o co chodzi -- coś tu usunęłam i elo
   /**
    * Adds the given dateSelection to the currently focused selection set
    * @param {DateSelection} dateSelection
    */
   addDateSelection(dateSelection: DateSelection): void {
-    const id = this.focusedSelectionSet;
-    if (dateSelection.openingDate && dateSelection.closingDate) {
-      const dates = generateDatesInRange(
-        dateSelection.openingDate,
-        dateSelection.closingDate,
-      );
-
-      const index = this.getSelectionSetIndex(id);
-      this.schedule = [
-        ...this.schedule.slice(0, index),
-        new DateSelectionSet({
-          id: this.schedule[index].id,
-          dates: [...this.schedule[index].dates, ...dates],
-          color: this.schedule[index].color,
-        }),
-        ...this.schedule.slice(index + 1),
-      ];
-    }
+    //   const id = this.focusedSelectionSetId;
+    //   if (dateSelection.openingDate && dateSelection.closingDate) {
+    //     const dates = generateDatesInRange(
+    //       dateSelection.openingDate,
+    //       dateSelection.closingDate,
+    //     );
+    //     this.schedule = {
+    //       ...this.schedule,
+    //       id: new DateSelectionSet({
+    //         id,
+    //         dates: [...this.schedule[index].dates, ...dates],
+    //         color: this.schedule[index].color,
+    //       }),
+    //     };
+    //   }
   }
 
   // if a day tile was assigned to a new selection set - switch selection sets in the schedule state
   removeFromSelectionSet(id: number, date: Date): void {
-    const index = this.getSelectionSetIndex(id);
-    this.schedule = [
-      ...this.schedule.slice(0, index),
-
-      new DateSelectionSet({
-        id: this.schedule[index].id,
-        dates: this.schedule[index].dates.filter(
-          (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
-        ),
-        color: this.schedule[index].color,
-      }),
-      ...this.schedule.slice(index + 1),
-    ];
+    // const index = this.getSelectionSetIndex(id);
+    // this.schedule = [
+    //   ...this.schedule.slice(0, index),
+    //   new DateSelectionSet({
+    //     id: this.schedule[index].id,
+    //     dates: this.schedule[index].dates.filter(
+    //       (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
+    //     ),
+    //     color: this.schedule[index].color,
+    //   }),
+    //   ...this.schedule.slice(index + 1),
+    // ];
   }
 }
 
@@ -237,10 +237,26 @@ export function stateReducer(
         ...state,
         datePickerScroll: action.payload,
       });
-    case 'SET_ACTIVE_SELECTION': {
-      const newActiveSelection = action.payload;
-      let updatedSchedule = state.schedule;
+    // case 'SET_HOVER_SELECTION': {
+    //   // let updatedSchedule = state.schedule;
 
+    //   // // WHY WHY WHYYYYY WAS I CHANGING THE SCHEDULE HERE??????
+    //   // updatedSchedule = replaceValueAtIndex(
+    //   //   state.schedule,
+    //   //   index,
+    //   //   new DateSelectionSet({
+    //   //     id: state.schedule[index].id,
+    //   //     dates: [...state.schedule[index].dates, ...dates],
+    //   //     color: state.schedule[index].color,
+    //   //   }),
+    //   // );
+
+    //   return new DatePickerState({
+    //     ...state,
+    //     hoverSelection: state.hoverSelection.pushEdgeDate(action.payload),
+    //     // schedule: updatedSchedule,
+    //   });
+    // }
     case 'SET_CURRENTLY_HOVERED_DATE': {
       return new DatePickerState({
         ...state,
@@ -264,68 +280,58 @@ export function stateReducer(
         ...state,
         mouseOverListening: action.payload,
       });
-    case 'SET_FOCUSED_SELECTION_SET':
+    case 'SET_FOCUSED_SELECTION_SET_ID':
       return new DatePickerState({
         ...state,
-        focusedSelectionSet: action.payload,
+        focusedSelectionSetId: action.payload,
       });
-    case 'UPDATE_DAY': {
-      const newDay = action.payload.day;
-      const dayIndex = action.payload.index;
+    case 'ADD_NEW_SELECTION_SET_TO_SCHEDULE':
       return new DatePickerState({
         ...state,
-        calendar: state.calendar?.copy({
-          dateRange: state.dateRange,
-          overwriteDays: replaceValueAtIndex(
-            state.calendar.days,
-            dayIndex,
-            newDay,
-          ),
-        }),
+        schedule: state.schedule.createNewSelectionSet(),
       });
-    }
     case 'ADD_SELECTION_TO_FOCUSED_SELECTION_SET': {
       const dateSelection = action.payload;
-      const id = state.focusedSelectionSet;
+      const id = state.focusedSelectionSetId;
       if (dateSelection.openingDate && dateSelection.closingDate) {
         const dates = generateDatesInRange(
           dateSelection.openingDate,
           dateSelection.closingDate,
         );
 
-        const index = state.getSelectionSetIndex(id);
+        // const index = state.getSelectionSetIndex(id);
         return new DatePickerState({
           ...state,
-          schedule: replaceValueAtIndex(
-            state.schedule,
-            index,
-            new DateSelectionSet({
-              id: state.schedule[index].id,
-              dates: [...state.schedule[index].dates, ...dates],
-              color: state.schedule[index].color,
-            }),
-          ),
+          // schedule: replaceValueAtIndex(
+          //   state.schedule,
+          //   index,
+          //   new DateSelectionSet({
+          //     id: state.schedule[index].id,
+          //     dates: [...state.schedule[index].dates, ...dates],
+          //     color: state.schedule[index].color,
+          //   }),
+          // ),
         });
       }
       return state;
     }
     case 'REMOVE_DATE_FROM_SELECTION_SET': {
       const { id, date } = action.payload;
-      const index = state.getSelectionSetIndex(id);
+      // const index = state.getSelectionSetIndex(id);
 
       return new DatePickerState({
         ...state,
-        schedule: replaceValueAtIndex(
-          state.schedule,
-          index,
-          new DateSelectionSet({
-            id: state.schedule[index].id,
-            dates: state.schedule[index].dates.filter(
-              (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
-            ),
-            color: state.schedule[index].color,
-          }),
-        ),
+        // schedule: replaceValueAtIndex(
+        //   state.schedule,
+        //   index,
+        //   new DateSelectionSet({
+        //     id: state.schedule[index].id,
+        //     dates: state.schedule[index].dates.filter(
+        //       (dateInSelection) => dateInSelection.getTime() !== date.getTime(),
+        //     ),
+        //     color: state.schedule[index].color,
+        //   }),
+        // ),
       });
     }
 

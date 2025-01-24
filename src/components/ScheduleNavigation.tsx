@@ -28,15 +28,12 @@ const StyledAddSelectionBtn = styled.button`
   }
 `;
 
-export interface ScheduleNavigationProps {
-  newSelectionSet: () => number;
-}
-
-const ScheduleNavigation = (props: ScheduleNavigationProps) => {
+const ScheduleNavigation = ({}) => {
   const {
     state: { schedule },
   } = useDatePickerState();
-  const selectionSets = schedule.map((selectionSet) => (
+
+  const selectionSets = schedule.selectionSetsStore.map((selectionSet) => (
     <ScheduleTile key={selectionSet.id} selectionSet={selectionSet} />
   ));
 
