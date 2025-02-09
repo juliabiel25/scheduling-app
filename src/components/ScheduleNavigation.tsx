@@ -1,6 +1,7 @@
 import { useDatePickerState } from '../state/StateContext';
 import ScheduleTile from './ScheduleTile';
 import styled from 'styled-components';
+import { createNewSelectionSet } from '../state/actions';
 
 const StyledScheduleNavigation = styled.div`
   display: flex;
@@ -31,15 +32,22 @@ const StyledAddSelectionBtn = styled.button`
 const ScheduleNavigation = ({}) => {
   const {
     state: { schedule },
+    dispatch,
   } = useDatePickerState();
 
-  const selectionSets = schedule.selectionSetsStore.map((selectionSet) => (
-    <ScheduleTile key={selectionSet.id} selectionSet={selectionSet} />
-  ));
+  const handleAddSelectionSetClick = () => {
+    dispatch(createNewSelectionSet());
+  };
+
+  const selectionSets = Object.keys(schedule.selectionSetsStore).map(
+    (selectionSetId) => (
+      <ScheduleTile key={selectionSetId} selectionSetId={selectionSetId} />
+    ),
+  );
 
   return (
     <StyledScheduleNavigation>
-      <StyledAddSelectionBtn onClick={props.newSelectionSet}>
+      <StyledAddSelectionBtn onClick={handleAddSelectionSetClick}>
         +
       </StyledAddSelectionBtn>
       {selectionSets}

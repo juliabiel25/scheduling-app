@@ -1,8 +1,7 @@
 import Calendar from '../utils/Calendar';
-import DayTile, { UpdatedDayProps } from './DayTile';
+import DayTile from './DayTile';
 import styled from 'styled-components';
 import { useDatePickerState } from '../state/StateContext';
-import { updateDay } from '../state/actions';
 
 const StyledWeekdayLabel = styled.div`
   color: rgb(191, 191, 191);

@@ -1,21 +1,15 @@
-import { useEffect } from 'react';
 import { useDatePickerState } from '../state/StateContext';
 
 import Day from '../utils/Day';
 import RGBAColor from '../utils/RGBAColor';
 import styled from 'styled-components';
 import {
-  disableMouseOverListening,
-  enableMouseOverListening,
-  markDayAsHovered,
-  markDayAsNotHovered,
-  setCurrentlyHoveredDate,
-  markDayAsSelected,
-  setHoverSelection,
+  startHoverSelection,
+  updateHoverSelection,
+  saveHoverSelection,
 } from '../state/actions';
-
 interface StyledDayTileProps {
-  tileColor: RGBAColor | null;
+  tileColor?: RGBAColor;
   isEnabled: boolean;
   isHovered: boolean;
 }
@@ -56,7 +50,7 @@ export type UpdatedDayProps = {
   isEnabled?: boolean;
   isHovered?: boolean;
   isCurrentMonth?: boolean;
-  selectionSetIndex?: number | null;
+  // selectionSetIndex?: number | null;
   color?: RGBAColor | null;
   hoverColor?: RGBAColor | null;
 };
@@ -67,88 +61,51 @@ export interface DayTileProps {
 
 const DayTile = ({ day }: DayTileProps) => {
   const {
-    state: { currentlyHoveredDate, hoverSelection },
+    state: {
+      hoverSelection,
+      mouseOverListening,
+      getSelectionSetColor,
+      focusedSelectionSetId,
+      getSelectionSetIdOfDate,
+    },
     dispatch,
   } = useDatePickerState();
 
-  // mark day as hovered or not on hoverSelection change
-  useEffect(() => {
-    if (currentlyHoveredDate && day.isEnabled) {
-      // if a selection was started and the day falls between the opening of the hover selection and the hovered date (or the other way aroung)
-      if (
-        hoverSelection.openingDate &&
-        ((day.date <= currentlyHoveredDate &&
-          day.date >= hoverSelection.openingDate) ||
-          (day.date >= currentlyHoveredDate &&
-            day.date <= hoverSelection.openingDate))
-      ) {
-        // record that the 'day' is hovered (if it's not marked as hovered already)
-        if (!day.isHovered) {
-          dispatch(markDayAsHovered(day.date));
-        }
-      } else {
-        // if 'day' was previously hovered but no longer falls between the current hover selection - unhover it
-        if (day.isHovered) {
-          dispatch(markDayAsNotHovered(day.date));
-        }
-      }
+  function handleDayTileClick() {
+    // if the hover selection has already been started, add the now complete selection to the selection set and reset the hover selection
+    if (hoverSelection.isBlank()) {
+      dispatch(startHoverSelection(day.date));
     }
-  }, [
-    currentlyHoveredDate,
-    hoverSelection.openingDate,
-    hoverSelection.closingDate,
-  ]);
 
-  // mark day as selected on hoverSelection change
-  useEffect(() => {
-    if (
-      day.isEnabled &&
-      hoverSelection.openingDate &&
-      hoverSelection.closingDate &&
-      ((day.date <= hoverSelection.closingDate &&
-        day.date >= hoverSelection.openingDate) ||
-        (day.date >= hoverSelection.openingDate &&
-          day.date <= hoverSelection.closingDate))
-    ) {
-      dispatch(markDayAsSelected(day.date));
+    if (hoverSelection.isComplete()) {
+      dispatch(saveHoverSelection());
     }
-  }, [hoverSelection]);
-
-  function dayTileClicked() {
-    // if the hover selection is already closed - make a new selection
-    if (hoverSelection.isBlank() || hoverSelection.isComplete()) {
-      // mark the first tile of the hover selection as hovered immediately
-      dispatch(markDayAsHovered(day.date));
-
-      // toggle on the onmouse event listener
-      dispatch(enableMouseOverListening());
-    } else if (hoverSelection.isIncomplete()) {
-      // matk the last tile of the hover selection as not hovered immediately after click
-      dispatch(markDayAsNotHovered(day.date));
-
-      // toggle off the onmouse event listener
-      dispatch(disableMouseOverListening());
-    }
-    dispatch(setHoverSelection(day.date));
   }
 
   // if tile is hovered --> set hover selection state
-  function dayTileHovered(date: Date) {
-    dispatch(setCurrentlyHoveredDate(date));
-    dispatch(setHoverSelection(date));
+  function handleDayTileHover() {
+    dispatch(updateHoverSelection(day.date));
+  }
+
+  function getTileColor() {
+    const selectionSetId = getSelectionSetIdOfDate(day.date);
+    if (hoverSelection.includesDate(day.date)) {
+      return getSelectionSetColor(focusedSelectionSetId);
+    }
+    if (selectionSetId) {
+      return getSelectionSetColor(selectionSetId);
+    }
   }
 
   return (
     <StyledDayTile
       className="no-select"
-      tileColor={day.hoverColor ?? day.color}
+      tileColor={getTileColor()}
       isEnabled={day.isEnabled}
-      isHovered={day.isHovered}
-      onClick={day.isEnabled ? dayTileClicked : undefined}
+      isHovered={hoverSelection.includesDate(day.date)}
+      onClick={day.isEnabled ? handleDayTileClick : undefined}
       onMouseOver={
-        hoverSelection.isIncomplete()
-          ? () => dayTileHovered(day.date)
-          : undefined
+        mouseOverListening && day.isEnabled ? handleDayTileHover : undefined
       }
     >
       {day.date.getDate()}

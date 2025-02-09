@@ -1,4 +1,5 @@
 import { UpdatedDayProps } from '../components/DayTile';
+import DateSelection from '../utils/DateSelection';
 
 export type Action = { type: string; payload?: any };
 
@@ -68,20 +69,41 @@ export const clearCurrentlyHoveredDate = (): Action => ({
   type: 'CLEAR_CURRENTLY_HOVERED_DATE',
 });
 
-export const setCurrentlyHoveredDate = (date: Date): Action => ({
-  type: 'SET_CURRENTLY_HOVERED_DATE',
-});
-
-export const setHoverSelection = (newEdgeDate: Date): Action => ({
+export const setHoverSelection = (newEdgeDate?: Date): Action => ({
   type: 'SET_HOVER_SELECTION',
   payload: newEdgeDate,
 });
 
-export const setFocusedSelectionSetId = (id: number): Action => ({
+export const startHoverSelection = (newEdgeDate?: Date): Action => ({
+  type: 'START_HOVER_SELECTION',
+  payload: newEdgeDate,
+});
+
+export const updateHoverSelection = (hoveredDate?: Date): Action => ({
+  type: 'UPDATE_HOVER_SELECTION',
+  payload: hoveredDate,
+});
+
+export const setFocusedSelectionSetId = (id: string): Action => ({
   type: 'SET_FOCUSED_SELECTION_SET_ID',
   payload: id,
 });
 
 export const createNewSelectionSet = (): Action => {
   return { type: 'ADD_NEW_SELECTION_SET_TO_SCHEDULE' };
+};
+
+export const addDateSelectionToFocusedSelectionSet = (
+  dateSelection: DateSelection,
+): Action => {
+  return {
+    type: 'ADD_DATE_SELECTION_TO_FOCUSED_SELECTION_SET',
+    payload: { dateSelection },
+  };
+};
+
+export const saveHoverSelection = (): Action => {
+  return {
+    type: 'SAVE_HOVER_SELECTION',
+  };
 };

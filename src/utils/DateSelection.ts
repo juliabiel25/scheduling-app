@@ -1,22 +1,24 @@
-import { randomUUID } from 'crypto';
-
 class DateSelection {
+  edgeDates: [] | [Date] | [Date, Date];
   openingDate?: Date;
   closingDate?: Date;
-  selectionSetId?: string;
 
-  constructor({
-    openingDate,
-    closingDate,
-    selectionSetId,
-  }: {
-    openingDate?: Date;
-    closingDate?: Date;
-    selectionSetId?: string;
-  } = {}) {
-    this.openingDate = openingDate;
-    this.closingDate = closingDate;
-    this.selectionSetId = selectionSetId;
+  constructor(edgeDates: [] | [Date] | [Date, Date] = []) {
+    this.edgeDates = edgeDates;
+    if (edgeDates.length === 1) {
+      this.openingDate = edgeDates[0];
+    }
+    if (edgeDates.length === 2) {
+      this.openingDate =
+        edgeDates[0] < edgeDates[1] ? edgeDates[0] : edgeDates[1];
+      this.closingDate =
+        edgeDates[0] > edgeDates[1] ? edgeDates[0] : edgeDates[1];
+    }
+  }
+
+  moveSecondaryEdgeDate(date: Date): DateSelection {
+    if (this.edgeDates.length === 0) return new DateSelection([date]);
+    return new DateSelection([this.edgeDates[0], date]);
   }
 
   startsInMonth([month, year]: [number, number]): boolean {
@@ -43,7 +45,7 @@ class DateSelection {
       : false;
   }
 
-  includesDay(day: Date): boolean {
+  includesDate(day: Date): boolean {
     return this.openingDate && this.closingDate
       ? day >= this.openingDate && day <= this.closingDate
       : false;
@@ -59,15 +61,15 @@ class DateSelection {
   }
 
   isBlank(): boolean {
-    return !this.openingDate && !this.closingDate;
+    return this.edgeDates.length === 0;
   }
 
   isComplete(): boolean {
-    return !!this.openingDate && !!this.closingDate;
+    return this.edgeDates.length === 2;
   }
 
   isIncomplete(): boolean {
-    return !!this.openingDate && !this.closingDate;
+    return this.edgeDates.length === 1;
   }
 
   toString(): string {
@@ -107,25 +109,16 @@ class DateSelection {
   }
 }
 
-interface CompleteDateSelectionIn {
-  openingDate: Date;
-  closingDate: Date;
-  selectionSetId?: string;
-}
-
 export class CompleteDateSelection extends DateSelection {
   openingDate: Date;
   closingDate: Date;
 
-  constructor({
-    openingDate,
-    closingDate,
-    selectionSetId,
-  }: CompleteDateSelectionIn) {
-    super({ openingDate, closingDate, selectionSetId });
-    this.openingDate = openingDate;
-    this.closingDate = closingDate;
-    this.selectionSetId = selectionSetId;
+  constructor(edgeDates: [Date, Date]) {
+    super(edgeDates);
+    this.openingDate =
+      edgeDates[0] > edgeDates[1] ? edgeDates[1] : edgeDates[0];
+    this.closingDate =
+      edgeDates[0] < edgeDates[1] ? edgeDates[1] : edgeDates[0];
   }
 
   isDateInSelection(date: Date) {
