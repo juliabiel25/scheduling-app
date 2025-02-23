@@ -277,6 +277,10 @@ export function stateReducer(
     }
     case 'SAVE_HOVER_SELECTION':
       if (state.hoverSelection.isComplete()) {
+        const newCompleteSelection = new CompleteDateSelection(
+          state.hoverSelection.edgeDates as [Date, Date],
+        );
+
         // a copy of current state...
         return new DatePickerState({
           ...state,
@@ -288,9 +292,7 @@ export function stateReducer(
                 ...state.schedule.selectionSetsStore[
                   state.focusedSelectionSetId
                 ],
-              }).addDateSelectionToSet(
-                state.hoverSelection as CompleteDateSelection,
-              ),
+              }).addDateSelectionToSet(newCompleteSelection),
             },
           }),
           hoverSelection: new DateSelection(),
