@@ -284,15 +284,14 @@ export function stateReducer(
             selectionSetsStore: {
               ...state.schedule.selectionSetsStore,
               //... but the hover selection is added to the focused selection set of the schedule
-              [state.schedule.focusedSelectionSetId]: new DateSelectionSet({
+              [state.focusedSelectionSetId]: new DateSelectionSet({
                 ...state.schedule.selectionSetsStore[
-                  state.schedule.focusedSelectionSetId
+                  state.focusedSelectionSetId
                 ],
               }).addDateSelectionToSet(
                 state.hoverSelection as CompleteDateSelection,
               ),
             },
-            focusedSelectionSetId: state.schedule.focusedSelectionSetId,
           }),
           hoverSelection: new DateSelection(),
           mouseOverListening: false,
