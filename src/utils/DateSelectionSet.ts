@@ -150,10 +150,6 @@ export default class DateSelectionSet {
       }
     }
 
-    console.log('removeDateSelectionFromSet::', {
-      previousSelections: this.dateSelections,
-      newSelections: finalDateSelections,
-    });
     this.dateSelections = finalDateSelections;
   }
 
