@@ -30,11 +30,9 @@ export default class Schedule {
   }
 
   addNewSelectionSet(selectionSet: DateSelectionSet): Schedule {
-    const newSelectionSetId = uuidv4();
-    this.selectionSetsStore[newSelectionSetId] = selectionSet;
+    this.selectionSetsStore[selectionSet.id] = selectionSet;
     return new Schedule({
       selectionSetsStore: this.selectionSetsStore,
-      focusedSelectionSetId: newSelectionSetId,
     });
   }
 }
