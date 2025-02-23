@@ -124,6 +124,18 @@ export class CompleteDateSelection extends DateSelection {
   isDateInSelection(date: Date) {
     return date >= this.openingDate && date <= this.closingDate;
   }
+
+  merge(selection: CompleteDateSelection) {
+    const newOpeningDate =
+      this.openingDate < selection.openingDate
+        ? this.openingDate
+        : selection.openingDate;
+    const newClosingDate =
+      this.closingDate > selection.closingDate
+        ? this.closingDate
+        : selection.closingDate;
+    return new CompleteDateSelection([newOpeningDate, newClosingDate]);
+  }
 }
 
 export default DateSelection;

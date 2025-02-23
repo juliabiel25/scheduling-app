@@ -47,10 +47,9 @@ export default class DateSelectionSet {
     // check if the ranges overlap
     const finalDateSelections: CompleteDateSelection[] = [];
     let aggregateDateSelection = mergedDateSelections[0];
-
-    mergedDateSelections.forEach((currentSelection, index) => {
-      if (index === 0) return; // Skip the first element as it's already set as aggregateDateSelection
-
+    let index = 1;
+    while (index < mergedDateSelections.length) {
+      const currentSelection = mergedDateSelections[index];
       const previousSelection = mergedDateSelections[index - 1];
 
       // if the closing date of the previous selection is greater than the opening date of the current selection, merge them
@@ -58,18 +57,19 @@ export default class DateSelectionSet {
         previousSelection.closingDate.getTime() >=
         currentSelection.openingDate.getTime()
       ) {
-        aggregateDateSelection = new CompleteDateSelection([
-          previousSelection.openingDate,
-          currentSelection.closingDate,
-        ]);
-        // else, push the merged selectionsand start a new aggregate selection
+        aggregateDateSelection = previousSelection.merge(currentSelection);
+        mergedDateSelections.splice(index, 1); // remove the current selection (already included in the aggregate)
+
+        // else, push the aggregated selections and start a new aggregate with the current one
       } else {
         finalDateSelections.push(aggregateDateSelection);
         aggregateDateSelection = currentSelection;
+        index++;
       }
-    });
+    }
 
-    finalDateSelections.push(aggregateDateSelection); // Push the last aggregate selection
+    // Push the last aggregate selection
+    finalDateSelections.push(aggregateDateSelection);
 
     return new DateSelectionSet({
       id: this.id,
