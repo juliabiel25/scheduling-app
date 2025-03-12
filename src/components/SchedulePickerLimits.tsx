@@ -5,6 +5,7 @@ import {
   setDateRangeEnd,
   generateCalendars,
 } from '../state/actions';
+import { useEffect } from 'react';
 
 export interface SchedulePickerLimitsProps {}
 
@@ -21,6 +22,9 @@ const StyledInputContainer = styled.div`
 
 const SchedulePickerLimits = ({}: SchedulePickerLimitsProps) => {
   const { state, dispatch } = useDatePickerState();
+  useEffect(() => {
+    dispatch(generateCalendars());
+  }, []);
 
   return (
     <StyledInputContainer className="dateRangeLimiter">
