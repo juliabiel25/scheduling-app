@@ -1,3 +1,4 @@
+import { MonthIndex } from '../types/types';
 import Day from './Day';
 import MonthRange from './MonthRange';
 import { range } from './functions';
@@ -15,15 +16,15 @@ class Calendar {
   weekdayNames: string[];
   monthNames: string[];
 
-  constructor(monthYear: [number, number], dateRange: MonthRange) {
+  constructor(monthIndex: MonthIndex, dateRange: MonthRange) {
     if (!dateRange.initDate) {
       throw new Error("The init date of the Calendar range wasn't selected");
     }
     if (!dateRange.finalDate) {
       throw new Error("The final date of the Calendar range wasn't selected");
     }
-    this.year = monthYear[1];
-    this.month = monthYear[0];
+    this.year = monthIndex.year;
+    this.month = monthIndex.month;
     this.numOfDays = new Date(this.year, this.month + 1, 0).getDate();
     this.firstWeekday = new Date(this.year, this.month, 1).getDay();
     this.offset = (this.firstWeekday + 6) % 7;
@@ -45,7 +46,7 @@ class Calendar {
         dateRange.finalDate &&
         (date < dateRange.initDate || date > dateRange.finalDate)
       ) {
-        return new Day(date, undefined, false);
+        return new Day(date, false, false);
       } else {
         return new Day(date);
       }
@@ -68,6 +69,21 @@ class Calendar {
       'Nov',
       'Dec',
     ];
+  }
+
+  copy({
+    dateRange,
+    overwriteDays,
+  }: {
+    dateRange: MonthRange;
+    overwriteDays?: Day[];
+  }): Calendar {
+    const newCalendar = new Calendar(
+      new MonthIndex(this.year, this.month),
+      dateRange,
+    );
+    if (overwriteDays) newCalendar.days = overwriteDays;
+    return newCalendar;
   }
 
   getMonthName = () => this.monthNames[this.month];

@@ -31,9 +31,19 @@ export const generateDatesInRange = (
   return dateArr;
 };
 
+export const isNextDay = (dateA: Date, dateB: Date): boolean => {
+  const nextDay = new Date(dateA);
+  nextDay.setDate(nextDay.getDate() + 1);
+
+  return (
+    dateB.getDate() === nextDay.getDate() &&
+    dateB.getMonth() === nextDay.getMonth() &&
+    dateB.getFullYear() === nextDay.getFullYear()
+  );
+};
+
 export const generateDateSelections = (
   dates: Date[],
-  selectionSetIndex: number,
 ): CompleteDateSelection[] => {
   dates = dates.sort((a, b) => (a < b ? -1 : 1));
   let dateSelections: CompleteDateSelection[] = [];
@@ -48,11 +58,7 @@ export const generateDateSelections = (
     if (index !== -1) {
       dateSelections = [
         ...dateSelections.slice(0, index),
-        new CompleteDateSelection({
-          openingDate: dateSelections[index].openingDate,
-          closingDate: date,
-          selectionSetIndex: selectionSetIndex,
-        }),
+        new CompleteDateSelection([dateSelections[index].openingDate, date]),
         ...dateSelections.slice(index + 1),
       ];
     } else {
@@ -64,24 +70,19 @@ export const generateDateSelections = (
       if (index !== -1) {
         dateSelections = [
           ...dateSelections.slice(0, index),
-          new CompleteDateSelection({
-            openingDate: date,
-            closingDate: dateSelections[index].openingDate,
-            selectionSetIndex: selectionSetIndex,
-          }),
+          new CompleteDateSelection([date, dateSelections[index].openingDate]),
           ...dateSelections.slice(index + 1),
         ];
       } else {
-        dateSelections.push(
-          new CompleteDateSelection({
-            openingDate: date,
-            closingDate: date,
-            selectionSetIndex: selectionSetIndex,
-          }),
-        );
+        dateSelections.push(new CompleteDateSelection([date, date]));
       }
     }
   }
-
   return dateSelections;
 };
+
+export function replaceValueAtIndex<T>(array: T[], index: number, value: T) {
+  const newArray = [...array];
+  newArray[index] = value;
+  return newArray;
+}

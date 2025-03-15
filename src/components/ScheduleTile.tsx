@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import { useDatePickerState } from '../state/StateContext';
 
-import { CompleteDateSelection } from '../utils/DateSelection';
-import DateSelectionSet from '../utils/DateSelectionSet';
 import RGBAColor from '../utils/RGBAColor';
-import { generateDateSelections } from '../utils/functions';
 import styled from 'styled-components';
+import { setFocusedSelectionSetId } from '../state/actions';
 
 interface StyledDateSelectionSetProps {
   isFocused: boolean;
-  selectionColor: RGBAColor;
+  selectionColor?: RGBAColor;
 }
 
 const StyledDateSelectionSet = styled.div<StyledDateSelectionSetProps>`
   /* style-dependant properties */
-  background-color: ${(props) => props.selectionColor.opacity(0.3).toString()};
+  background-color: ${(props) => props.selectionColor?.opacity(0.3).toString()};
 
   left: ${(props) => (props.isFocused ? '1em' : '0')};
 
   outline: ${(props) =>
-    props.isFocused ? `3px solid ${props.selectionColor.toString()}` : null};
+    props.isFocused ? `3px solid ${props.selectionColor?.toString()}` : null};
 
   outline-offset: ${(props) => (props.isFocused ? '-3px' : null)};
 
@@ -34,28 +32,24 @@ const StyledDateSelectionSet = styled.div<StyledDateSelectionSetProps>`
 `;
 
 export interface ScheduleTileProps {
-  selectionSet: DateSelectionSet;
-  focusedSelectionSet: number;
-  getSelectionSetIndex: (id: number) => number;
-  setFocusedSelectionSet: (index: number) => void;
+  selectionSetId: string;
 }
 
-const ScheduleTile = (props: ScheduleTileProps) => {
-  const [dateSelections, setDateSelections] = useState<CompleteDateSelection[]>(
-    [],
-  );
-  const selectionSetClicked = (): void => {
-    props.setFocusedSelectionSet(props.selectionSet.id);
-  };
+const ScheduleTile = ({ selectionSetId }: ScheduleTileProps) => {
+  const {
+    state: {
+      focusedSelectionSetId,
+      getSelectionSetColor,
+      schedule: { selectionSetsStore },
+    },
+    dispatch,
+  } = useDatePickerState();
 
-  useEffect(() => {
-    setDateSelections(
-      generateDateSelections(
-        props.selectionSet.dates,
-        props.getSelectionSetIndex(props.selectionSet.id),
-      ),
-    );
-  }, [props.selectionSet]);
+  const dateSelections = selectionSetsStore[selectionSetId].dateSelections;
+
+  const selectionSetClicked = (): void => {
+    dispatch(setFocusedSelectionSetId(selectionSetId));
+  };
 
   const dateSelectionJSX =
     dateSelections.length === 0 ? (
@@ -73,8 +67,8 @@ const ScheduleTile = (props: ScheduleTileProps) => {
   return (
     <StyledDateSelectionSet
       onClick={selectionSetClicked}
-      isFocused={props.focusedSelectionSet === props.selectionSet.id}
-      selectionColor={props.selectionSet.color}
+      isFocused={focusedSelectionSetId === selectionSetId}
+      selectionColor={getSelectionSetColor(selectionSetId)}
     >
       {dateSelectionJSX}
     </StyledDateSelectionSet>
