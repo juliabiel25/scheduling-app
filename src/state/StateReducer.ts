@@ -5,7 +5,7 @@ import MonthRange from '../utils/MonthRange';
 import RGBAColor from '../utils/RGBAColor';
 import { replaceValueAtIndex } from '../utils/functions';
 import { MonthIndex } from '../types/types';
-import { Action } from './actions';
+import { Action, generateCalendars } from './actions';
 import { UpdatedDayProps } from '../components/DayTile';
 import Day from '../utils/Day';
 import { CompleteDateSelection } from '../utils/DateSelection';
@@ -13,8 +13,17 @@ import Schedule from '../utils/Schedule';
 
 export type Calendars = { [key: string]: Calendar };
 
+const defaultMonthIndex = new MonthIndex(
+  new Date().getMonth(),
+  new Date().getFullYear(),
+);
+
 export class DatePickerState {
-  dateRange = new MonthRange(null, null);
+  // default date range = the current month
+  dateRange = new MonthRange(
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+  );
   calendars: Calendars = {};
   schedule: Schedule = new Schedule();
   // TODO assign the first created selection set as the focused one here:
