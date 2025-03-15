@@ -1,6 +1,7 @@
 import RGBAColor from './RGBAColor';
 import { v4 as uuidv4 } from 'uuid';
 import { CompleteDateSelection } from './DateSelection';
+import { isNextDay } from './functions';
 
 export type DateSelectionSetProps = {
   id?: string;
@@ -44,7 +45,7 @@ export default class DateSelectionSet {
       (a, b) => a.openingDate.getTime() - b.openingDate.getTime(),
     );
 
-    // check if the ranges overlap
+    // check if the ranges overlap or touch
     const finalDateSelections: CompleteDateSelection[] = [];
     let aggregateDateSelection = mergedDateSelections[0];
     let index = 1;
@@ -55,13 +56,18 @@ export default class DateSelectionSet {
       // if the closing date of the previous selection is greater than the opening date of the current selection, merge them
       if (
         previousSelection.closingDate.getTime() >=
-        currentSelection.openingDate.getTime()
+          currentSelection.openingDate.getTime() ||
+        isNextDay(previousSelection.closingDate, currentSelection.openingDate)
       ) {
+        // merge the two overlapping selections
         aggregateDateSelection = previousSelection.merge(currentSelection);
-        mergedDateSelections.splice(index, 1); // remove the current selection (already included in the aggregate)
 
-        // else, push the aggregated selections and start a new aggregate with the current one
+        // replace the previous selection with the newly merged one (used for recurrent merges)
+        mergedDateSelections[index - 1] = aggregateDateSelection;
+
+        mergedDateSelections.splice(index, 1); // remove the current selection (already included in the merged previous)
       } else {
+        // else, push the aggregated selections and start a new aggregate with the current one
         finalDateSelections.push(aggregateDateSelection);
         aggregateDateSelection = currentSelection;
         index++;
