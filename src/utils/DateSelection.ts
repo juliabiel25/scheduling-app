@@ -1,3 +1,5 @@
+import { addDays, subDays } from 'date-fns';
+
 class DateSelection {
   edgeDates: [] | [Date] | [Date, Date];
   openingDate?: Date;
@@ -135,6 +137,69 @@ export class CompleteDateSelection extends DateSelection {
         ? this.closingDate
         : selection.closingDate;
     return new CompleteDateSelection([newOpeningDate, newClosingDate]);
+  }
+
+  overlapsWithSelection(selection: CompleteDateSelection): boolean {
+    const partialRightOverlap =
+      this.openingDate <= selection.openingDate &&
+      this.closingDate >= selection.openingDate;
+    const partialLeftOverlap =
+      this.openingDate >= selection.openingDate &&
+      this.closingDate <= selection.closingDate;
+    const fullOverlap =
+      (this.openingDate <= selection.openingDate &&
+        this.closingDate >= selection.closingDate) ||
+      (this.openingDate >= selection.openingDate &&
+        this.closingDate <= selection.closingDate);
+    return partialRightOverlap || partialLeftOverlap || fullOverlap;
+  }
+
+  removeOverlap(
+    removedSelection: CompleteDateSelection,
+  ): CompleteDateSelection[] {
+    console.log('Removing overlap in selection: ', {
+      dateSelection: this.toString(),
+      removedSelection: removedSelection.toString(),
+    });
+
+    // if there is no overlap, return the current selection
+    if (!this.overlapsWithSelection(removedSelection)) return [this];
+
+    // if current selection is completely covered by the removed selection, return an empty array
+    if (
+      removedSelection.openingDate <= this.openingDate &&
+      removedSelection.closingDate >= this.closingDate
+    )
+      return [];
+
+    // if the current selection is parially covered by the removed selection, return the non-overlapping parts
+    if (this.openingDate >= removedSelection.openingDate) {
+      return [
+        new CompleteDateSelection([
+          addDays(removedSelection.closingDate, 1),
+          this.closingDate,
+        ]),
+      ];
+    }
+    if (this.closingDate <= removedSelection.closingDate) {
+      return [
+        new CompleteDateSelection([
+          this.openingDate,
+          subDays(removedSelection.openingDate, 1),
+        ]),
+      ];
+    }
+    // if the removed selection is entirely contained within the current selection, return two new selections created by the split
+    return [
+      new CompleteDateSelection([
+        this.openingDate,
+        subDays(removedSelection.openingDate, 1),
+      ]),
+      new CompleteDateSelection([
+        addDays(removedSelection.closingDate, 1),
+        this.closingDate,
+      ]),
+    ];
   }
 }
 

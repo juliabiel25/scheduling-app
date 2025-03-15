@@ -93,15 +93,6 @@ export const createNewSelectionSet = (): Action => {
   return { type: 'ADD_NEW_SELECTION_SET_TO_SCHEDULE' };
 };
 
-export const addDateSelectionToFocusedSelectionSet = (
-  dateSelection: DateSelection,
-): Action => {
-  return {
-    type: 'ADD_DATE_SELECTION_TO_FOCUSED_SELECTION_SET',
-    payload: { dateSelection },
-  };
-};
-
 export const saveHoverSelection = (): Action => {
   return {
     type: 'SAVE_HOVER_SELECTION',

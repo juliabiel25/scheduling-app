@@ -290,18 +290,48 @@ export function stateReducer(
           state.hoverSelection.edgeDates as [Date, Date],
         );
 
+        // seperate the non-focused selection sets from the focused one
+        const blurredSelectionSets = Object.keys(
+          state.schedule.selectionSetsStore,
+        )
+          .filter(
+            (selectionSetId) => selectionSetId !== state.focusedSelectionSetId,
+          )
+          .map(
+            (selectionSetId) =>
+              state.schedule.selectionSetsStore[selectionSetId],
+          );
+
+        // remove the to-be-saved selection from all non-focused selection sets (so that a single date only belongs to one selection set)
+        console.log('Removing the newly saved selection from blurred sets...');
+        const updatedBlurredSelectionSets = blurredSelectionSets.map(
+          (blurredSelectionSet) =>
+            blurredSelectionSet
+              .removeDateSelectionFromSet(newCompleteSelection)
+              .mergeSelectionsOverlap(),
+        );
+
+        // convert the array of selection sets to a map
+        const updatedBlurredSelectionSetsStore =
+          updatedBlurredSelectionSets.reduce((prev, curr) => {
+            return { ...prev, [curr.id]: curr };
+          }, {});
+
+        // add the new selection to the focused selection set
+        const newFocusedSelectionSet = new DateSelectionSet({
+          ...state.schedule.selectionSetsStore[state.focusedSelectionSetId],
+        }).addDateSelectionToSet(newCompleteSelection);
+
         // a copy of current state...
         return new DatePickerState({
           ...state,
           schedule: new Schedule({
             selectionSetsStore: {
-              ...state.schedule.selectionSetsStore,
-              //... but the hover selection is added to the focused selection set of the schedule
-              [state.focusedSelectionSetId]: new DateSelectionSet({
-                ...state.schedule.selectionSetsStore[
-                  state.focusedSelectionSetId
-                ],
-              }).addDateSelectionToSet(newCompleteSelection),
+              // the selection gets removed from all non-focused selection sets...
+              ...updatedBlurredSelectionSetsStore,
+
+              // ...and gets added to the focused selection set
+              [state.focusedSelectionSetId]: newFocusedSelectionSet,
             },
           }),
           hoverSelection: new DateSelection(),

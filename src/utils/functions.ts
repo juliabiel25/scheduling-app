@@ -31,6 +31,17 @@ export const generateDatesInRange = (
   return dateArr;
 };
 
+export const isNextDay = (dateA: Date, dateB: Date): boolean => {
+  const nextDay = new Date(dateA);
+  nextDay.setDate(nextDay.getDate() + 1);
+
+  return (
+    dateB.getDate() === nextDay.getDate() &&
+    dateB.getMonth() === nextDay.getMonth() &&
+    dateB.getFullYear() === nextDay.getFullYear()
+  );
+};
+
 export const generateDateSelections = (
   dates: Date[],
 ): CompleteDateSelection[] => {

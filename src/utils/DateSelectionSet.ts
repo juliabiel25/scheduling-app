@@ -28,20 +28,9 @@ export default class DateSelectionSet {
     this.color = color;
   }
 
-  addDateSelectionToSet(selection: CompleteDateSelection): DateSelectionSet {
-    // if no selection exist within the selection set, simply add the new selection
-    if (this.dateSelections.length === 0) {
-      // ok
-      return new DateSelectionSet({
-        id: this.id,
-        dateSelections: [selection],
-        timeSelections: this.timeSelections,
-        color: this.color,
-      });
-    }
-
+  mergeSelectionsOverlap(): DateSelectionSet {
     // if there are existing selections, merge the new selection with the existing ones and sort by the opening date
-    const mergedDateSelections = [...this.dateSelections, selection].sort(
+    const mergedDateSelections = this.dateSelections.sort(
       (a, b) => a.openingDate.getTime() - b.openingDate.getTime(),
     );
 
@@ -76,7 +65,6 @@ export default class DateSelectionSet {
 
     // Push the last aggregate selection
     finalDateSelections.push(aggregateDateSelection);
-
     return new DateSelectionSet({
       id: this.id,
       dateSelections: finalDateSelections,
@@ -85,83 +73,63 @@ export default class DateSelectionSet {
     });
   }
 
-  removeDateSelectionFromSet(removedSelection: CompleteDateSelection): void {
-    let i = 0;
-    let finalDateSelections: CompleteDateSelection[] = [];
-
-    while (i < this.dateSelections.length) {
-      const selection = this.dateSelections[i];
-
-      // complete overlap between this selection and the removed selection - remove this selection entirely
-      if (
-        selection.openingDate <= removedSelection.openingDate &&
-        selection.closingDate >= removedSelection.closingDate
-      ) {
-        continue;
-      }
-
-      // no overlap between this selection and the removed selection - no changes
-      if (selection.closingDate < removedSelection.openingDate) {
-        finalDateSelections.push(selection);
-        continue;
-      }
-
-      // partial overlap towards the end of the selection - adjust the closing date
-      if (
-        selection.openingDate >= removedSelection.openingDate &&
-        selection.closingDate > removedSelection.closingDate
-      ) {
-        selection.closingDate = removedSelection.openingDate;
-        finalDateSelections.push(selection);
-        continue;
-      }
-
-      // partial overlap towards the beginning of the selection - adjust the opening date
-      if (
-        selection.openingDate >= removedSelection.openingDate &&
-        selection.closingDate > removedSelection.closingDate
-      ) {
-        selection.openingDate = removedSelection.closingDate;
-        finalDateSelections.push(selection);
-        continue;
-      }
-
-      // if the removed selection is entirely within the current selection - split the current selection into two
-      if (
-        selection.openingDate < removedSelection.openingDate &&
-        selection.closingDate > removedSelection.closingDate
-      ) {
-        finalDateSelections.push(
-          new CompleteDateSelection([
-            selection.openingDate,
-            removedSelection.openingDate,
-          ]),
-          new CompleteDateSelection([
-            removedSelection.closingDate,
-            selection.closingDate,
-          ]),
-        );
-      }
-
-      // if there is leftover to-be-removed indexes that go beyond the current selection - check the next selection for additionial overlaps.
-      // Otherwise exit the loop and push the following selections with no more changes
-      if (selection.closingDate < removedSelection.closingDate) {
-        i++;
-      } else {
-        finalDateSelections = [
-          ...finalDateSelections,
-          ...this.dateSelections.slice(i + 1),
-        ];
-        break;
-      }
+  addDateSelectionToSet(selection: CompleteDateSelection): DateSelectionSet {
+    // if no selection exist within the selection set, simply add the new selection
+    if (this.dateSelections.length === 0) {
+      // ok
+      return new DateSelectionSet({
+        id: this.id,
+        dateSelections: [selection],
+        timeSelections: this.timeSelections,
+        color: this.color,
+      });
     }
 
-    this.dateSelections = finalDateSelections;
+    // if there are existing selections, merge the new selection with the existing ones and sort by the opening date
+    const mergedDateSelections = [...this.dateSelections, selection];
+    const newSelectionSet = new DateSelectionSet({
+      id: this.id,
+      dateSelections: mergedDateSelections,
+      timeSelections: this.timeSelections,
+      color: this.color,
+    });
+
+    return newSelectionSet.mergeSelectionsOverlap();
   }
 
-  includesDate = (date: Date): boolean => {
+  removeDateSelectionFromSet(
+    removedDateSelection: CompleteDateSelection,
+  ): DateSelectionSet {
+    // if there is no overlap between the to-be-removed selection and the current selection set, return the current selection set with no changes
+    if (!this.overlapsWithDateSelection(removedDateSelection)) {
+      return this;
+    }
+
+    // if there is overlap - remove it
+    const updatedSelections = this.dateSelections.flatMap((selection) => {
+      const updatedSelection = selection.removeOverlap(removedDateSelection);
+      console.log('Selection after removing overlap: ', updatedSelection);
+      return updatedSelection;
+    });
+
+    return new DateSelectionSet({
+      id: this.id,
+      dateSelections: updatedSelections,
+      timeSelections: this.timeSelections,
+      color: this.color,
+    });
+  }
+
+  includesDate(date: Date): boolean {
     return this.dateSelections.some((selection) =>
       selection.includesDate(date),
     );
-  };
+  }
+
+  overlapsWithDateSelection(dateSelection: CompleteDateSelection): boolean {
+    // the selection set has some overlap with a date selection if any of of its selections overlaps with it
+    return this.dateSelections.some((selection) =>
+      selection.overlapsWithSelection(dateSelection),
+    );
+  }
 }
